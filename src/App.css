@@ -1,5 +1,7 @@
 .App {
   text-align: center;
+  background-color: #282c34;
+  height: 100vh;
 }
 
 .App-logo {
@@ -14,8 +16,7 @@
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+  min-height: 10vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -35,4 +36,20 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+
+.Game-cover {
+  animation: blurIn 20s;
+  background-size: contain;
+  width: 500px;
+  height: 500px; 
+}
+@keyframes blurIn {
+  0% {filter: blur(50px);}
+  100% {filter: blur(0px);}
+}
+
+span {
+  color: white;
 }
