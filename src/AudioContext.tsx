@@ -9,8 +9,11 @@ import {
 import { TRACKS } from "./data/tracks";
 
 export interface Song {
+  song_id: string;
+  artist_name: string; 
+  name: string;
   preview_url: string;
-  cover: string;
+  image_url: string;
   year: number;
 }
 
@@ -40,7 +43,7 @@ export function AudioProvider({
     playedSongs: [],
   });
 
-  audioRef.current.volume = 0.15;
+  audioRef.current.volume = 0.05;
 
   const playNext = useMemo( () => () => {
     const i = Math.random() * (state.songs?.length || 0);
