@@ -103,7 +103,10 @@ function Game() {
     <div className="Game">
       <Cover />
       {!gameRunning && (
-        <button onClick={() => setAllowPlayback(true)}>start</button>
+        <button onClick={() => {
+          audioContext.init();
+          setAllowPlayback(true)
+        }}>start</button>
       )}
       <Timeline />
     </div>

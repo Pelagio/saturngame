@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { TRACKS } from "./data/tracks";
+import { TRACKS, BASE_SOUND } from "./data/tracks";
 
 export interface Song {
   song_id: string;
@@ -25,11 +25,12 @@ interface AudioContextInnerState {
 
 export interface AudioContextState {
   playNext: () => void;
-
+  init: () => void;
 }
 
 export const AudioContext = createContext<AudioContextState>({
   playNext: () => {},
+  init: () => {},
 });
 
 export function AudioProvider({
@@ -37,11 +38,15 @@ export function AudioProvider({
 }: {
   children: ReactNode;
 }): React.ReactElement {
-  const audioRef = useRef<HTMLAudioElement>(new Audio());
+  const audioRef = useRef<HTMLAudioElement>(new Audio(BASE_SOUND));
   const [state, setState] = useState<AudioContextInnerState>({
     songs: [...TRACKS],
     playedSongs: [],
   });
+
+  const init = useMemo(() => () => {
+    audioRef.current?.play();
+  },[])
 
   audioRef.current.volume = 0.05;
 
@@ -64,7 +69,7 @@ export function AudioProvider({
     }
   }, [state.songs, state.playedSongs, state.currentSong]);
 
-  const contextState = { ...state, playNext };
+  const contextState = { ...state, playNext, init };
   return (
     <AudioContext.Provider value={contextState}>
       {children}
