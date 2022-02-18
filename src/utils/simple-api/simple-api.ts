@@ -1,5 +1,5 @@
 const REACT_APP_AUTH_URL = process.env.REACT_APP_AUTH_URL;
-const REACT_APP_API_URL = process.env.REACT_APP_API_URL || "https://57f04dabb808.ngrok.io";
+const REACT_APP_API_URL = process.env.REACT_APP_API_URL || "https://1b1e5ebb4a89.ngrok.io";
 
 export const Endpoint = {
     login: `${REACT_APP_AUTH_URL}/login`,

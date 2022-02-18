@@ -111,9 +111,9 @@ function Game() {
 
   const startGame = useMemo(
     () => () => {
-      audioContext.playNext();
+      audioContext.startGame(gameId);
     },
-    [audioContext]
+    [audioContext, gameId]
   );
 
   useEffect(() => {
@@ -122,6 +122,11 @@ function Game() {
       startGame();
     }
   }, [allowPlayback, startGame, setGameRunning, gameRunning]);
+
+  const onReadyPress = () => {
+    audioContext.init();
+    audioContext.joinGame(gameId)
+  }
 
   return (
     <div className="Game">
@@ -135,6 +140,13 @@ function Game() {
           }}
         >
           start
+        </button>
+      )}
+      {!gameRunning && (
+        <button
+          onClick={onReadyPress}
+        >
+          ready
         </button>
       )}
       <Timeline />
