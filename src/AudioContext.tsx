@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 import { TRACKS, BASE_SOUND } from "./data/tracks";
+import { SimpleApi } from "./utils/simple-api/simple-api";
 
 export interface Song {
   song_id: string;
@@ -26,11 +27,13 @@ interface AudioContextInnerState {
 export interface AudioContextState {
   playNext: () => void;
   init: () => void;
+  newGame: () => void;
 }
 
 export const AudioContext = createContext<AudioContextState>({
   playNext: () => {},
   init: () => {},
+  newGame: () => {},
 });
 
 export function AudioProvider({
@@ -69,7 +72,14 @@ export function AudioProvider({
     }
   }, [state.songs, state.playedSongs, state.currentSong]);
 
-  const contextState = { ...state, playNext, init };
+  const newGame = async () => {
+    const api = new SimpleApi();
+    const { data = { gameId: "single" } } = await api.newGame();
+    const { gameId } = data;
+    return gameId;
+  };
+
+  const contextState = { ...state, playNext, init, newGame };
   return (
     <AudioContext.Provider value={contextState}>
       {children}

@@ -1,12 +1,31 @@
 import React, { useEffect, useMemo, useState } from "react";
+import QRCode from "react-qr-code";
+import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import "./App.css";
 
 import { AudioProvider, Song, useAudioContext } from "./AudioContext";
 
-function Segment({ onClick, index, lastIndex }: { onClick: (index: number) => void, index: number, lastIndex: number }) {
+export const getOrigin = () => {
+  if (typeof window !== "undefined") {
+    return window?.location?.origin || document?.location?.origin;
+  } else {
+    return "";
+  }
+};
+
+
+function Segment({
+  onClick,
+  index,
+  lastIndex,
+}: {
+  onClick: (index: number) => void;
+  index: number;
+  lastIndex: number;
+}) {
   return (
     <div className="Segment" onClick={() => onClick(index)}>
-      {index === 0 ? "BEFORE" :  index !== lastIndex ?  "<--->" : "AFTER"}
+      {index === 0 ? "BEFORE" : index !== lastIndex ? "<--->" : "AFTER"}
     </div>
   );
 }
@@ -61,7 +80,11 @@ function Timeline() {
       {years.map((y, index) => (
         <React.Fragment key={`${y.song_id}`}>
           <SongPin song={y} />
-          <Segment onClick={onSegmentPress} index={index + 1} lastIndex={years.length}/>
+          <Segment
+            onClick={onSegmentPress}
+            index={index + 1}
+            lastIndex={years.length}
+          />
         </React.Fragment>
       ))}
     </div>
@@ -80,6 +103,7 @@ function Cover() {
 }
 
 function Game() {
+  let { gameId } = useParams();
   const audioContext = useAudioContext();
 
   const [allowPlayback, setAllowPlayback] = useState(false);
@@ -102,13 +126,32 @@ function Game() {
   return (
     <div className="Game">
       <Cover />
+      {!gameRunning && (<QRCode value={`${getOrigin()}/game/${gameId}`} size={150} />)}
       {!gameRunning && (
-        <button onClick={() => {
-          audioContext.init();
-          setAllowPlayback(true)
-        }}>start</button>
+        <button
+          onClick={() => {
+            audioContext.init();
+            setAllowPlayback(true);
+          }}
+        >
+          start
+        </button>
       )}
       <Timeline />
+    </div>
+  );
+}
+
+function New() {
+  let navigate = useNavigate();
+  const { newGame } = useAudioContext();
+  const onNewGamePress = async () => {
+    const gameId = await newGame();
+    navigate(`/game/${gameId}`);
+  };
+  return (
+    <div>
+      <button onClick={onNewGamePress}>New game</button>
     </div>
   );
 }
@@ -120,7 +163,10 @@ function App() {
         <header className="App-header">
           <h1>SATURNUS</h1>
         </header>
-        <Game />
+        <Routes>
+          <Route path="/" element={<New />} />
+          <Route path="game/:gameId" element={<Game />} />
+        </Routes>
       </AudioProvider>
     </div>
   );
