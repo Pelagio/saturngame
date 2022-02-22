@@ -1,5 +1,5 @@
 import { useEffect, createContext, useContext, useRef } from "react";
-const SOCKET_URL = "wss://c1e7edb5f270.ngrok.io";
+const SOCKET_URL = "wss://139.162.154.132:3006";
 
 const webSocket = new WebSocket(SOCKET_URL);
 
