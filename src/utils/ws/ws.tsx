@@ -1,5 +1,5 @@
 import { useEffect, createContext, useContext, useRef } from "react";
-const SOCKET_URL = "wss://139.162.154.132:3006";
+const SOCKET_URL = "wss://servers.saturngame.se";
 
 const webSocket = new WebSocket(SOCKET_URL);
 
