@@ -1,5 +1,5 @@
 const REACT_APP_AUTH_URL = process.env.REACT_APP_AUTH_URL;
-const REACT_APP_API_URL = process.env.REACT_APP_API_URL || "https://servers.saturngame.se";
+const REACT_APP_API_URL = process.env.REACT_APP_API_URL || "https://api.saturngame.se";
 
 export const Endpoint = {
     login: `${REACT_APP_AUTH_URL}/login`,
