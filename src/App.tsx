@@ -41,7 +41,8 @@ function SongPin({ song }: { song: Partial<Song> }) {
 }
 
 function Timeline() {
-  const { currentSong, playNext } = useAudioContext();
+    let { gameId } = useParams();
+  const { currentSong, lockAnswer } = useAudioContext();
 
   const [years, setYears] = useState<Song[]>([
     {
@@ -66,7 +67,7 @@ function Timeline() {
     ) {
       setYears([...years, currentSong].sort((a, b) => a.year - b.year));
     }
-    playNext();
+    lockAnswer(gameId || "");
   };
 
   if (!currentSong) {

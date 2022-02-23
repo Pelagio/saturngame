@@ -27,7 +27,7 @@ interface AudioContextInnerState {
 }
 
 export interface AudioContextState {
-  playNext: (songNumber?: number) => void;
+  lockAnswer: (gameId: string, correct?: boolean) => void;
   init: () => void;
   newGame: () => void;
   startGame: (gameId?: string) => void;
@@ -35,7 +35,7 @@ export interface AudioContextState {
 }
 
 export const AudioContext = createContext<AudioContextState>({
-  playNext: () => {},
+  lockAnswer: () => {},
   init: () => {},
   newGame: () => {},
   startGame: () => {},
@@ -60,10 +60,15 @@ export function AudioProvider({
 
   audioRef.current.volume = 0.05;
 
-  const playNext = useMemo( () => (songNumber?: number) => {
-    const i = songNumber || Math.random() * (state.songs?.length || 0);
-    const song = state.songs?.[Math.floor(i)];
+  const lockAnswer = useMemo( () => (gameId: string, correct?: boolean) => {
+    socket?.send(JSON.stringify({command: "LOCK_ANSWER", correct, gameId}));
+
+  }, [socket]);
+
+
+  const play = useMemo( () => (song?: Song) => {
     if (song) {
+      const i = TRACKS.findIndex(t => song.song_id === t.song_id);
       audioRef.current?.pause();
       audioRef.current.src = song.preview_url;
       audioRef.current.currentTime = 0;
@@ -90,12 +95,19 @@ export function AudioProvider({
     if (socket) {
       socket.onmessage = (msg) => {
         const data = JSON.parse(msg.data);
-        if (data.command === "START") {
-          playNext(data.songNumber);
+        switch (data.command) {
+          case "START":
+            play(data.song);
+            break;
+          case "NEW_SONG":
+            play(data.song);
+            break;
+          default:
+            return;
         }
       };
     }
-  }, [socket, playNext])
+  }, [socket, lockAnswer, play])
 
   const startGame = useMemo(() => (gameId?: string) => {
     socket?.send(JSON.stringify({command: "REQUEST_START", gameId}));
@@ -105,7 +117,7 @@ export function AudioProvider({
     socket?.send(JSON.stringify({command: "JOIN", gameId}));
   } , [socket])
 
-  const contextState = { ...state, playNext, init, newGame, startGame, joinGame };
+  const contextState = { ...state, lockAnswer, init, newGame, startGame, joinGame };
   return (
     <AudioContext.Provider value={contextState}>
       {children}
