@@ -13,18 +13,23 @@ export const getOrigin = () => {
   }
 };
 
-
 function Segment({
   onClick,
   index,
   lastIndex,
+  selected,
 }: {
   onClick: (index: number) => void;
   index: number;
   lastIndex: number;
+  selected: boolean;
 }) {
   return (
-    <div className="Segment" onClick={() => onClick(index)}>
+    <div
+      className="Segment"
+      onClick={() => onClick(index)}
+      style={selected ? { backgroundColor: "goldenrod" } : {}}
+    >
       {index === 0 ? "BEFORE" : index !== lastIndex ? "<--->" : "AFTER"}
     </div>
   );
@@ -41,43 +46,38 @@ function SongPin({ song }: { song: Partial<Song> }) {
 }
 
 function Timeline() {
-    let { gameId } = useParams();
-  const { currentSong, lockAnswer } = useAudioContext();
+  let { gameId } = useParams();
+  const {
+    currentSong,
+    lockAnswer,
+    correctAnswers: years = [],
+  } = useAudioContext();
 
-  const [years, setYears] = useState<Song[]>([
-    {
-      year: 2000,
-      song_id: "-1",
-      image_url: "",
-      preview_url: "",
-      artist_name: "",
-      name: "",
-    },
-  ]);
+  const [selectedSegment, setSelectedSegment] = useState<number>();
 
   const onSegmentPress = (segmentIndex: number) => {
-    const songBeforeSegment = years[segmentIndex - 1];
-    const after = songBeforeSegment ? songBeforeSegment.year : Math.max();
-    const songafterSegment = years[segmentIndex];
-    const before = songafterSegment ? songafterSegment.year : Math.min();
-    if (
-      currentSong?.year &&
-      currentSong.year >= after &&
-      currentSong.year <= before
-    ) {
-      setYears([...years, currentSong].sort((a, b) => a.year - b.year));
-    }
-    lockAnswer(gameId || "");
+    lockAnswer(gameId || "", segmentIndex);
+    setSelectedSegment(segmentIndex);
   };
+
+  useEffect(() => {
+    setSelectedSegment(undefined);
+  }, [currentSong])
 
   if (!currentSong) {
     return null;
   }
+  
 
   return (
     <div className="Timeline">
       {/* <h1>{currentSong?.year}</h1> */}
-      <Segment onClick={onSegmentPress} index={0} lastIndex={years.length} />
+      <Segment
+        onClick={onSegmentPress}
+        index={0}
+        lastIndex={years.length}
+        selected={selectedSegment === 0}
+      />
       {years.map((y, index) => (
         <React.Fragment key={`${y.song_id}`}>
           <SongPin song={y} />
@@ -85,6 +85,7 @@ function Timeline() {
             onClick={onSegmentPress}
             index={index + 1}
             lastIndex={years.length}
+            selected={!!(selectedSegment && index === selectedSegment - 1)}
           />
         </React.Fragment>
       ))}
@@ -126,13 +127,15 @@ function Game() {
 
   const onReadyPress = () => {
     audioContext.init();
-    audioContext.joinGame(gameId)
-  }
+    audioContext.joinGame(gameId);
+  };
 
   return (
     <div className="Game">
       <Cover />
-      {!gameRunning && (<QRCode value={`${getOrigin()}/game/${gameId}`} size={150} />)}
+      {!gameRunning && (
+        <QRCode value={`${getOrigin()}/game/${gameId}`} size={150} />
+      )}
       {!gameRunning && (
         <button
           onClick={() => {
@@ -143,13 +146,7 @@ function Game() {
           start
         </button>
       )}
-      {!gameRunning && (
-        <button
-          onClick={onReadyPress}
-        >
-          ready
-        </button>
-      )}
+      {!gameRunning && <button onClick={onReadyPress}>ready</button>}
       <Timeline />
     </div>
   );
