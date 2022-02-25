@@ -4,6 +4,7 @@ import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import "./App.css";
 
 import { AudioProvider, Song, useAudioContext } from "./AudioContext";
+import { GameProvider, useGameContext } from "./GameContext";
 
 export const getOrigin = () => {
   if (typeof window !== "undefined") {
@@ -51,7 +52,7 @@ function Timeline() {
     currentSong,
     lockAnswer,
     correctAnswers: years = [],
-  } = useAudioContext();
+  } = useGameContext();
 
   const [selectedSegment, setSelectedSegment] = useState<number>();
 
@@ -62,12 +63,11 @@ function Timeline() {
 
   useEffect(() => {
     setSelectedSegment(undefined);
-  }, [currentSong])
+  }, [currentSong]);
 
   if (!currentSong) {
     return null;
   }
-  
 
   return (
     <div className="Timeline">
@@ -106,6 +106,7 @@ function Cover() {
 
 function Game() {
   let { gameId } = useParams();
+  const gameContext = useGameContext();
   const audioContext = useAudioContext();
 
   const [allowPlayback, setAllowPlayback] = useState(false);
@@ -113,9 +114,9 @@ function Game() {
 
   const startGame = useMemo(
     () => () => {
-      audioContext.startGame(gameId);
+      gameContext.startGame(gameId);
     },
-    [audioContext, gameId]
+    [gameContext, gameId]
   );
 
   useEffect(() => {
@@ -127,7 +128,7 @@ function Game() {
 
   const onReadyPress = () => {
     audioContext.init();
-    audioContext.joinGame(gameId);
+    gameContext.joinGame(gameId);
   };
 
   return (
@@ -154,7 +155,7 @@ function Game() {
 
 function New() {
   let navigate = useNavigate();
-  const { newGame } = useAudioContext();
+  const { newGame } = useGameContext();
   const onNewGamePress = async () => {
     const gameId = await newGame();
     navigate(`/game/${gameId}`);
@@ -170,13 +171,15 @@ function App() {
   return (
     <div className="App">
       <AudioProvider>
-        <header className="App-header">
-          <h1>SATURNUS</h1>
-        </header>
-        <Routes>
-          <Route path="/" element={<New />} />
-          <Route path="game/:gameId" element={<Game />} />
-        </Routes>
+        <GameProvider>
+          <header className="App-header">
+            <h1>SATURNUS</h1>
+          </header>
+          <Routes>
+            <Route path="/" element={<New />} />
+            <Route path="game/:gameId" element={<Game />} />
+          </Routes>
+        </GameProvider>
       </AudioProvider>
     </div>
   );
