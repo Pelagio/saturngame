@@ -2,6 +2,7 @@ import {
   createContext,
   ReactNode,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -21,16 +22,19 @@ interface AudioContextInnerState {
   songs?: Song[];
   currentSong?: Song;
   playedSongs?: Song[];
+  volume?: number;
 }
 
 export interface AudioContextState {
   init: () => void;
   play: (song: Song) => void;
+  setVolume: (volume: number) => void;
 }
 
 export const AudioContext = createContext<AudioContextState>({
   init: () => {},
   play: () => {},
+  setVolume: () => {},
 });
 
 export function AudioProvider({
@@ -42,6 +46,7 @@ export function AudioProvider({
   const [state, setState] = useState<AudioContextInnerState>({
     songs: [...TRACKS],
     playedSongs: [],
+    volume: 0.5,
   });
 
   const init = useMemo(
@@ -51,8 +56,12 @@ export function AudioProvider({
     []
   );
 
-  audioRef.current.volume = 0.5;
-
+  const setVolume = useMemo(
+    () => (volume: number) => {
+      setState((curr) => ({ ...curr, volume }));
+    },
+    []
+  );
 
   const play = useMemo(
     () => (song?: Song) => {
@@ -61,13 +70,13 @@ export function AudioProvider({
         audioRef.current.src = song.preview_url;
         audioRef.current.currentTime = 0;
         audioRef.current.play();
-        
+
         const i = TRACKS.findIndex((t) => song.song_id === t.song_id);
         const playedSongs = state.currentSong
           ? [...(state.playedSongs || []), state.currentSong]
           : state.playedSongs;
 
-        setState(currentState => ({
+        setState((currentState) => ({
           ...currentState,
           playedSongs,
           songs: [
@@ -81,10 +90,15 @@ export function AudioProvider({
     [state.songs, state.playedSongs, state.currentSong]
   );
 
+  useEffect(() => {
+    audioRef.current.volume = state.volume || .5;
+  }, [state.volume]);
+
   const contextState = {
     ...state,
+    setVolume,
     init,
-    play
+    play,
   };
   return (
     <AudioContext.Provider value={contextState}>

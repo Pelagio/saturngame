@@ -113,3 +113,11 @@ h1 {
   font-size: 25px;
   z-index: 2;
 }
+
+
+.MuteButton {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  cursor: pointer;
+}
