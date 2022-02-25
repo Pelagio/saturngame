@@ -27,7 +27,7 @@ export interface GameContextState {
   lockAnswer: (gameId: string, answer: number) => void;
   newGame: () => void;
   startGame: (gameId?: string) => void;
-  joinGame: (gameId?: string) => void;
+  joinGame: (gameId: string, guest?: boolean) => void;
   currentSong?: Song;
 }
 
@@ -50,9 +50,12 @@ export function GameProvider({
     correctAnswers: [],
   });
 
-  const nextSong = useMemo(() => (song: Song) => {
-    play(song);
-  }, [play])
+  const nextSong = useMemo(
+    () => (song: Song) => {
+      play(song);
+    },
+    [play]
+  );
 
   const lockAnswer = useMemo(
     () => (gameId: string, answer: number) => {
@@ -102,8 +105,10 @@ export function GameProvider({
   );
 
   const joinGame = useMemo(
-    () => (gameId?: string) => {
-      socket?.send(JSON.stringify({ command: "JOIN", gameId }));
+    () => (gameId: string, guest?: boolean) => {
+      socket?.send(
+        JSON.stringify({ command: guest ? "JOIN_GUEST" : "JOIN", gameId })
+      );
     },
     [socket]
   );
@@ -117,9 +122,7 @@ export function GameProvider({
     joinGame,
   };
   return (
-    <GameContext.Provider value={contextState}>
-      {children}
-    </GameContext.Provider>
+    <GameContext.Provider value={contextState}>{children}</GameContext.Provider>
   );
 }
 

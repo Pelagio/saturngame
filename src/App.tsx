@@ -105,12 +105,17 @@ function Cover() {
 }
 
 function Game() {
+  let navigate = useNavigate();
   let { gameId } = useParams();
+
   const gameContext = useGameContext();
   const audioContext = useAudioContext();
 
   const [allowPlayback, setAllowPlayback] = useState(false);
   const [gameRunning, setGameRunning] = useState(false);
+
+  const [playerReady, setPlayerReady] = useState(false);
+
 
   const startGame = useMemo(
     () => () => {
@@ -126,18 +131,36 @@ function Game() {
     }
   }, [allowPlayback, startGame, setGameRunning, gameRunning]);
 
+  useEffect(() => {
+    setPlayerReady(false);
+  }, [gameId]);
+
+  if (!gameId) {
+    navigate("/");
+    return <></>;
+  }
+
   const onReadyPress = () => {
     audioContext.init();
-    gameContext.joinGame(gameId);
+    setPlayerReady(true);
+    gameContext.joinGame(gameId!);
   };
+
+  const onWatchPress = () => {
+    audioContext.init();
+    setPlayerReady(true);
+    gameContext.joinGame(gameId!, true);
+  };
+
+
 
   return (
     <div className="Game">
       <Cover />
-      {!gameRunning && (
+      {!gameContext.currentSong && (
         <QRCode value={`${getOrigin()}/game/${gameId}`} size={150} />
       )}
-      {!gameRunning && (
+      {!gameContext.currentSong && playerReady && (
         <button
           onClick={() => {
             audioContext.init();
@@ -147,7 +170,8 @@ function Game() {
           start
         </button>
       )}
-      {!gameRunning && <button onClick={onReadyPress}>ready</button>}
+      {!gameContext.currentSong && !playerReady && <button onClick={onReadyPress}>play</button>}
+      {!gameContext.currentSong && !playerReady &&  <button onClick={onWatchPress}>watch</button>}
       <Timeline />
     </div>
   );
