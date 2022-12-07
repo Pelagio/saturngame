@@ -2,6 +2,7 @@
   text-align: center;
   background-color: #0b4e63;
   height: 100vh;
+  overflow: hidden;
 }
 
 .App-header {
@@ -26,10 +27,30 @@
     filter: blur(0px);
   }
 }
+
+.Game {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0px 10px;
+}
+
 @media only screen and (min-height: 768px) {
   .Cover {
     height: 500px;
     width: 500px;
+  }
+}
+
+@media only screen and (max-width: 428px) {
+  .Cover {
+    width: 100%;
+    padding-top: 100%;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+    height: unset;
   }
   @keyframes blurIn {
     0% {
@@ -38,6 +59,16 @@
     100% {
       filter: blur(0px);
     }
+  }
+
+  .App {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 80px 1fr;
+  }
+
+  .Game {
+    justify-content: space-between;
   }
 }
 
@@ -57,19 +88,59 @@ h1 {
   color: white;
 }
 
-.Game {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 0px 10px;
-}
-
 .Timeline {
   align-self: stretch;
   flex-direction: row;
   display: flex;
   align-items: center;
+}
+
+@media screen and (max-width: 600px) {
+  .Timeline {
+    flex-direction: column;
+    display: block;
+    position: relative;
+    padding-left: 30vw;
+    overflow: hidden;
+    height: 300px;
+  }
+  .Timeline-List {
+    scroll-snap-type: y mandatory;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    height: 100%;
+  }
+  .Timeline-Cursor {
+    position: absolute;
+    left: 20px;
+    top: -30px;
+    width: 50%;
+    z-index: 10;
+    text-align: start;
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: center;
+    pointer-events: none;
+    color: white;
+  }
+  .Timeline-List-Spacer {
+    scroll-snap-align: center;
+    border-radius: unset;
+    height: 60px;
+    width: 100%;
+  }
+
+  .Timeline-LockButton {
+    position: absolute;
+    right: 20px;
+    top: -25px;
+    z-index: 10;
+    height: 100%;
+    align-items: center;
+    display: flex;
+  }
 }
 
 .Segment {
@@ -98,6 +169,7 @@ h1 {
   margin: 0px 10px;
   z-index: 0;
 }
+
 .SongPin-inner {
   height: 30px;
   width: 30px;
@@ -112,6 +184,20 @@ h1 {
 .SongPin > span {
   font-size: 25px;
   z-index: 2;
+}
+
+@media screen and (max-width: 600px) {
+  .SongPin {
+    scroll-snap-align: center;
+    border-radius: unset;
+    height: 60px;
+    background-color: unset;
+    box-shadow: unset;
+  }
+
+  .SongPin-inner {
+    display: none;
+  }
 }
 
 

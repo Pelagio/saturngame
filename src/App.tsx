@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { MutableRefObject, useEffect, useMemo, useState } from "react";
 import QRCode from "react-qr-code";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import "./App.css";
@@ -93,6 +93,56 @@ function Timeline() {
   );
 }
 
+function MobileTimeline() {
+  let { gameId } = useParams();
+
+  const timeline: MutableRefObject<any> = React.useRef(null);
+  const {
+    currentSong,
+    lockAnswer,
+    correctAnswers: years = [],
+  } = useGameContext();
+
+  const onSegmentPress = (segmentIndex: number) => {
+    lockAnswer(gameId || "", segmentIndex);
+  };
+
+  useEffect(() => {
+    // timeline.current?.scrollTo({top: years.length * 31} )
+  }, [years.length]);
+
+  if (!currentSong) {
+    return null;
+  }
+
+  return (
+    <div className="Timeline">
+      <div className="Timeline-Cursor">
+        <h2>AFTER:</h2>
+        <div style={{width: "100%", height: "2px", backgroundColor: "white"}}></div>
+        <h2>BEFORE:</h2>
+      </div>
+      <div className="Timeline-LockButton" onClick={() => {
+        const { scrollTop } = timeline.current;
+        const selectedIndex = Math.round(scrollTop / 62);
+          onSegmentPress(selectedIndex)
+        }}>LOCK</div>
+      <div className="Timeline-List" ref={timeline}>
+      <div className="Timeline-List-Spacer" />
+      <div className="Timeline-List-Spacer" />
+      {[...years].map((y, index) => (
+        <React.Fragment key={`${y.song_id}`}>
+          <SongPin song={y} />
+        </React.Fragment>
+      ))}
+      <div className="Timeline-List-Spacer" />
+      <div className="Timeline-List-Spacer" />
+      <div className="Timeline-List-Spacer" />
+      </div>
+    </div>
+  );
+}
+
 function SoundOffIcon() {
   return (
     <svg
@@ -102,13 +152,7 @@ function SoundOffIcon() {
       version="1.1"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <g
-        id="Page"
-        stroke="none"
-        strokeWidth="1"
-        fill="none"
-        fillRule="evenodd"
-      >
+      <g id="Page" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
         <g
           id="Android"
           transform="translate(-2196.000000, -9584.000000)"
@@ -146,13 +190,7 @@ function SoundOffIcon() {
 function SoundOnIcon() {
   return (
     <svg width="30px" height="30px" viewBox="0 0 384 384" version="1.1">
-      <g
-        id="Page"
-        stroke="none"
-        strokeWidth="1"
-        fill="none"
-        fillRule="evenodd"
-      >
+      <g id="Page" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
         <g
           id="Android"
           transform="translate(-3096.000000, -9584.000000)"
@@ -244,8 +282,9 @@ function Game() {
     gameContext.joinGame(gameId!, true);
   };
 
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   return (
-    <div className="Game">
+    <div className="Game" style={!gameContext.currentSong ? {justifyContent: "flex-start"}: {}}>
       <MuteButton />
       <Cover />
       {!gameContext.currentSong && (
@@ -267,7 +306,7 @@ function Game() {
       {!gameContext.currentSong && !playerReady && (
         <button onClick={onWatchPress}>watch</button>
       )}
-      <Timeline />
+      {isMobile ? <MobileTimeline /> : <Timeline />}
     </div>
   );
 }

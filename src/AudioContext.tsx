@@ -91,7 +91,7 @@ export function AudioProvider({
   );
 
   useEffect(() => {
-    audioRef.current.volume = state.volume || .5;
+    audioRef.current.volume = (state.volume || state.volume === 0) ? state.volume : .5;
   }, [state.volume]);
 
   const contextState = {
