@@ -14,7 +14,7 @@ export function Lobby({ gameId }: { gameId: string }) {
     <div className="Lobby">
       <div className="Lobby-qr">
         <QRCode
-          value={`${getOrigin()}/game/${gameId}`}
+          value={`${getOrigin()}/game/${gameId}?mode=controller`}
           size={150}
           bgColor="transparent"
           fgColor="white"

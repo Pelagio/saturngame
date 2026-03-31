@@ -334,6 +334,110 @@
   }
 }
 
+/* --- Phone Controller --- */
+
+.Controller {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-md);
+  height: calc(100vh - 100px);
+  gap: var(--space-md);
+}
+
+.Controller-title {
+  margin: 0;
+}
+
+.Controller-waiting {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.Controller-status {
+  color: var(--color-text-muted);
+  font-style: italic;
+  margin: 0;
+}
+
+.Controller-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  justify-content: center;
+}
+
+.Controller-player-badge {
+  background: var(--color-surface);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-xl);
+  font-size: var(--text-sm);
+}
+
+.Controller-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+}
+
+.Controller-name {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+}
+
+.Controller-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-lg);
+  border-radius: var(--radius-xl);
+  animation: fadeIn 0.3s ease;
+}
+
+.Controller-result.correct {
+  background: rgba(76, 194, 122, 0.15);
+}
+
+.Controller-result.wrong {
+  background: rgba(224, 82, 82, 0.15);
+}
+
+.Controller-result-icon {
+  font-size: 48px;
+}
+
+.Controller-result.correct .Controller-result-icon {
+  color: var(--color-correct);
+}
+
+.Controller-result.wrong .Controller-result-icon {
+  color: var(--color-wrong);
+}
+
+.Controller-result-song {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  margin: 0;
+}
+
+.Controller-result-artist {
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.Controller-gameover {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+}
+
 /* --- Mobile Lobby --- */
 
 @media only screen and (max-width: 600px) {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useGameContext } from "../GameContext";
 import { useAudioContext } from "../AudioContext";
 import { MuteButton } from "../components/MuteButton";
@@ -10,10 +10,14 @@ import { NameEntry } from "./NameEntry";
 import { Lobby } from "./Lobby";
 import { RoundResult } from "./RoundResult";
 import { GameOver } from "./GameOver";
+import { ControllerGame } from "./ControllerGame";
 
 export function Game() {
   const navigate = useNavigate();
   const { gameId } = useParams();
+  const [searchParams] = useSearchParams();
+  const isController = searchParams.get("mode") === "controller";
+
   const gameContext = useGameContext();
   const audioContext = useAudioContext();
   const [joined, setJoined] = useState(false);
@@ -22,6 +26,13 @@ export function Game() {
     navigate("/");
     return <></>;
   }
+
+  // Controller mode — lightweight phone UI
+  if (isController) {
+    return <ControllerGame />;
+  }
+
+  // --- Full game mode (desktop / standalone) ---
 
   // Not joined yet — show name entry
   if (!joined) {
