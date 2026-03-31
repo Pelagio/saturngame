@@ -108,9 +108,7 @@ function MobileTimeline() {
     <div className="Timeline" role="group" aria-label="Song timeline">
       <div className="Timeline-Cursor">
         <h2>AFTER:</h2>
-        <div
-          style={{ width: "100%", height: "2px", backgroundColor: "white" }}
-        />
+        <div className="Timeline-Cursor-line" />
         <h2>BEFORE:</h2>
       </div>
       <button
