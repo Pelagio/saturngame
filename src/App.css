@@ -654,3 +654,314 @@ h1 {
   border: none;
   padding: var(--space-sm);
 }
+
+/* ===========================
+   TV Display Route (/tv/:id)
+   =========================== */
+
+.Tv-app {
+  overflow: auto;
+}
+
+.Tv {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+}
+
+/* TV Lobby */
+
+.Tv-lobby {
+  display: flex;
+  gap: 80px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.Tv-qr-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
+.Tv-join-label {
+  font-family: var(--font-display);
+  font-size: 32px;
+  margin: 0;
+}
+
+.Tv-join-url {
+  font-size: 18px;
+  color: var(--color-text-muted);
+  margin: 0;
+  word-break: break-all;
+  max-width: 350px;
+  text-align: center;
+}
+
+.Tv-player-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  min-width: 300px;
+}
+
+.Tv-heading {
+  font-size: 40px;
+  margin: 0;
+}
+
+.Tv-waiting {
+  font-size: 24px;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.Tv-player-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.Tv-player-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+}
+
+.Tv-player-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 24px;
+  color: white;
+}
+
+.Tv-player-name {
+  font-family: var(--font-display);
+  font-size: 28px;
+}
+
+/* TV Gameplay */
+
+.Tv-gameplay {
+  display: flex;
+  gap: 60px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.Tv-cover {
+  width: 500px;
+  height: 500px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 20px;
+  animation: blurIn 20s;
+  flex-shrink: 0;
+}
+
+.Tv-scoreboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  min-width: 300px;
+}
+
+.Tv-scoreboard-title {
+  font-size: 32px;
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.Tv-score-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+}
+
+.Tv-score-name {
+  font-family: var(--font-display);
+  font-size: 28px;
+}
+
+.Tv-score-value {
+  font-family: var(--font-display);
+  font-size: 36px;
+  color: var(--color-gold);
+}
+
+/* TV Round Result */
+
+.Tv-round-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xl);
+  animation: fadeIn 0.4s ease;
+}
+
+.Tv-result-cover {
+  width: 350px;
+  height: 350px;
+  border-radius: 20px;
+  object-fit: cover;
+}
+
+.Tv-result-info {
+  text-align: center;
+}
+
+.Tv-result-title {
+  font-size: 48px;
+  margin: 0 0 8px;
+}
+
+.Tv-result-artist {
+  font-size: 28px;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.Tv-result-year {
+  font-family: var(--font-display);
+  font-size: 36px;
+  color: var(--color-gold);
+  margin: 8px 0 0;
+}
+
+.Tv-result-players {
+  display: flex;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.Tv-result-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-xl);
+  font-size: 24px;
+}
+
+.Tv-result-row.correct {
+  background: rgba(76, 194, 122, 0.15);
+}
+
+.Tv-result-row.wrong {
+  background: rgba(224, 82, 82, 0.15);
+}
+
+.Tv-result-icon {
+  font-size: 32px;
+}
+
+.Tv-result-row.correct .Tv-result-icon {
+  color: var(--color-correct);
+}
+
+.Tv-result-row.wrong .Tv-result-icon {
+  color: var(--color-wrong);
+}
+
+.Tv-result-name {
+  font-family: var(--font-display);
+  font-size: 28px;
+}
+
+.Tv-result-score {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--color-gold);
+}
+
+/* TV Game Over */
+
+.Tv-game-over {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xl);
+  animation: fadeIn 0.4s ease;
+}
+
+.Tv-game-over-label {
+  font-size: 28px;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.Tv-game-over-winner {
+  font-size: 72px;
+  color: var(--color-gold);
+  margin: 0;
+}
+
+.Tv-leaderboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  width: 100%;
+  max-width: 500px;
+}
+
+.Tv-leaderboard-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  font-size: 24px;
+}
+
+.Tv-leaderboard-row.winner {
+  background: rgba(245, 200, 66, 0.15);
+  border: 2px solid var(--color-gold);
+}
+
+.Tv-leaderboard-rank {
+  color: var(--color-text-muted);
+  width: 40px;
+}
+
+.Tv-leaderboard-name {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: 32px;
+  text-align: left;
+}
+
+.Tv-leaderboard-score {
+  font-family: var(--font-display);
+  font-size: 40px;
+  color: var(--color-gold);
+}
+
+.Tv-qr-small {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+}
