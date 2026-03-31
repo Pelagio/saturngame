@@ -9,15 +9,41 @@ import {
 import { useAudioContext } from "./AudioContext";
 import { SimpleApi } from "./utils/simple-api/simple-api";
 import { useSocket } from "./utils/ws/ws";
-import { Song } from "./types/game";
+import { Song, PlayerSummary, PlayerResult } from "./types/game";
+
+export type GamePhase =
+  | "idle"
+  | "lobby"
+  | "playing"
+  | "round_result"
+  | "game_over";
+
+interface RoundResultData {
+  song: Song;
+  results: PlayerResult[];
+}
+
+interface GameOverData {
+  winner?: { id: string; name: string };
+  players: PlayerSummary[];
+}
 
 interface GameContextState {
+  // Actions
   lockAnswer: (gameId: string, answer: number) => void;
   newGame: () => Promise<string>;
   startGame: (gameId?: string) => void;
-  joinGame: (gameId: string, guest?: boolean) => void;
+  joinGame: (gameId: string, guest?: boolean, name?: string) => void;
+  playAgain: () => void;
+  // State
+  phase: GamePhase;
   currentSong?: Song;
   correctAnswers?: Song[];
+  players: PlayerSummary[];
+  roundResult?: RoundResultData;
+  gameOver?: GameOverData;
+  playerName: string;
+  setPlayerName: (name: string) => void;
 }
 
 const GameContext = createContext<GameContextState>({
@@ -25,13 +51,31 @@ const GameContext = createContext<GameContextState>({
   newGame: async () => "",
   startGame: () => {},
   joinGame: () => {},
+  playAgain: () => {},
+  phase: "idle",
+  players: [],
+  playerName: "",
+  setPlayerName: () => {},
 });
 
 export function GameProvider({ children }: { children: ReactNode }) {
   const socket = useSocket();
-  const { play } = useAudioContext();
+  const { play, stop } = useAudioContext();
+
+  const [phase, setPhase] = useState<GamePhase>("idle");
   const [correctAnswers, setCorrectAnswers] = useState<Song[]>([]);
   const [currentSong, setCurrentSong] = useState<Song>();
+  const [players, setPlayers] = useState<PlayerSummary[]>([]);
+  const [roundResult, setRoundResult] = useState<RoundResultData>();
+  const [gameOver, setGameOver] = useState<GameOverData>();
+  const [playerName, setPlayerNameState] = useState(
+    () => localStorage.getItem("saturn_player_name") || "",
+  );
+
+  const setPlayerName = useCallback((name: string) => {
+    setPlayerNameState(name);
+    localStorage.setItem("saturn_player_name", name);
+  }, []);
 
   const lockAnswer = useCallback(
     (gameId: string, answer: number) => {
@@ -54,13 +98,22 @@ export function GameProvider({ children }: { children: ReactNode }) {
   );
 
   const joinGame = useCallback(
-    (gameId: string, guest?: boolean) => {
-      socket?.send(
-        JSON.stringify({ command: guest ? "JOIN_GUEST" : "JOIN", gameId }),
-      );
+    (gameId: string, guest?: boolean, name?: string) => {
+      const command = guest ? "JOIN_GUEST" : "JOIN";
+      socket?.send(JSON.stringify({ command, gameId, name }));
+      setPhase("lobby");
     },
     [socket],
   );
+
+  const playAgain = useCallback(() => {
+    setPhase("idle");
+    setCurrentSong(undefined);
+    setCorrectAnswers([]);
+    setPlayers([]);
+    setRoundResult(undefined);
+    setGameOver(undefined);
+  }, []);
 
   useEffect(() => {
     if (!socket) return;
@@ -73,6 +126,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
         return;
       }
 
+      // Update player list from any event that includes it
+      if (data.players && Array.isArray(data.players)) {
+        setPlayers(data.players);
+      }
+
+      // Update own correct answers
       if (data.player?.correctAnswers) {
         setCorrectAnswers(data.player.correctAnswers);
       }
@@ -82,16 +141,36 @@ export function GameProvider({ children }: { children: ReactNode }) {
         case "NEW_SONG":
           play(data.song);
           setCurrentSong(data.song);
+          setRoundResult(undefined);
+          setPhase("playing");
           break;
+
+        case "ROUND_RESULT":
+          stop();
+          setRoundResult({ song: data.song, results: data.results });
+          setPhase("round_result");
+          break;
+
         case "MATCH_FINISHED":
+          stop();
           setCurrentSong(undefined);
-          alert(data.winner ? "You won!" : "You lost!");
+          setGameOver({
+            winner: data.winner,
+            players: data.players || [],
+          });
+          setPhase("game_over");
           break;
+
+        case "PLAYER_JOINED":
+        case "PLAYER_LEFT":
+          // players already updated above
+          break;
+
         default:
           break;
       }
     };
-  }, [socket, play]);
+  }, [socket, play, stop]);
 
   return (
     <GameContext.Provider
@@ -100,8 +179,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
         newGame,
         startGame,
         joinGame,
+        playAgain,
+        phase,
         currentSong,
         correctAnswers,
+        players,
+        roundResult,
+        gameOver,
+        playerName,
+        setPlayerName,
       }}
     >
       {children}

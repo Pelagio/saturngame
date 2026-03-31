@@ -16,6 +16,7 @@ const SILENT_AUDIO =
 interface AudioContextState {
   init: () => void;
   play: (song: Song) => void;
+  stop: () => void;
   setVolume: (volume: number) => void;
   currentSong?: Song;
   volume: number;
@@ -24,6 +25,7 @@ interface AudioContextState {
 const AudioCtx = createContext<AudioContextState>({
   init: () => {},
   play: () => {},
+  stop: () => {},
   setVolume: () => {},
   volume: 0.5,
 });
@@ -49,12 +51,16 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     setCurrentSong(song);
   }, []);
 
+  const stop = useCallback(() => {
+    audioRef.current.pause();
+  }, []);
+
   useEffect(() => {
     audioRef.current.volume = volume;
   }, [volume]);
 
   return (
-    <AudioCtx.Provider value={{ init, play, setVolume, currentSong, volume }}>
+    <AudioCtx.Provider value={{ init, play, stop, setVolume, currentSong, volume }}>
       {children}
     </AudioCtx.Provider>
   );
