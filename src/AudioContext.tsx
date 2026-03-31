@@ -1,115 +1,65 @@
 import {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
-import { TRACKS, BASE_SOUND } from "./data/tracks";
+import { Song } from "./types/game";
 
-export interface Song {
-  song_id: string;
-  artist_name: string;
-  name: string;
-  preview_url: string;
-  image_url: string;
-  year: number;
-}
+// Short silent MP3 data URI to unlock audio playback on mobile
+const SILENT_AUDIO =
+  "data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABhgC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAAYYoRBqSAAAAAAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABhgC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAAYYoRBqSAAAAAAAAAAAAAAAAAAAA";
 
-interface AudioContextInnerState {
-  songs?: Song[];
-  currentSong?: Song;
-  playedSongs?: Song[];
-  volume?: number;
-}
-
-export interface AudioContextState {
+interface AudioContextState {
   init: () => void;
   play: (song: Song) => void;
   setVolume: (volume: number) => void;
+  currentSong?: Song;
+  volume: number;
 }
 
-export const AudioContext = createContext<AudioContextState>({
+const AudioCtx = createContext<AudioContextState>({
   init: () => {},
   play: () => {},
   setVolume: () => {},
+  volume: 0.5,
 });
 
-export function AudioProvider({
-  children,
-}: {
-  children: ReactNode;
-}): React.ReactElement {
-  const audioRef = useRef<HTMLAudioElement>(new Audio(BASE_SOUND));
-  const [state, setState] = useState<AudioContextInnerState>({
-    songs: [...TRACKS],
-    playedSongs: [],
-    volume: 0.5,
-  });
+export function AudioProvider({ children }: { children: ReactNode }) {
+  const audioRef = useRef<HTMLAudioElement>(new Audio(SILENT_AUDIO));
+  const [currentSong, setCurrentSong] = useState<Song>();
+  const [volume, setVolumeState] = useState(0.5);
 
-  const init = useMemo(
-    () => () => {
-      audioRef.current?.play();
-    },
-    []
-  );
+  const init = useCallback(() => {
+    audioRef.current?.play().catch(() => {});
+  }, []);
 
-  const setVolume = useMemo(
-    () => (volume: number) => {
-      setState((curr) => ({ ...curr, volume }));
-    },
-    []
-  );
+  const setVolume = useCallback((v: number) => {
+    setVolumeState(v);
+  }, []);
 
-  const play = useMemo(
-    () => (song?: Song) => {
-      if (song) {
-        audioRef.current?.pause();
-        audioRef.current.src = song.preview_url;
-        audioRef.current.currentTime = 0;
-        audioRef.current.play();
-
-        const i = TRACKS.findIndex((t) => song.song_id === t.song_id);
-        const playedSongs = state.currentSong
-          ? [...(state.playedSongs || []), state.currentSong]
-          : state.playedSongs;
-
-        setState((currentState) => ({
-          ...currentState,
-          playedSongs,
-          songs: [
-            ...(state.songs || []).slice(0, i),
-            ...(state.songs || []).slice(i + 1),
-          ],
-          currentSong: song,
-        }));
-      }
-    },
-    [state.songs, state.playedSongs, state.currentSong]
-  );
+  const play = useCallback((song: Song) => {
+    audioRef.current.pause();
+    audioRef.current.src = song.preview_url;
+    audioRef.current.currentTime = 0;
+    audioRef.current.play().catch(() => {});
+    setCurrentSong(song);
+  }, []);
 
   useEffect(() => {
-    audioRef.current.volume = (state.volume || state.volume === 0) ? state.volume : .5;
-  }, [state.volume]);
+    audioRef.current.volume = volume;
+  }, [volume]);
 
-  const contextState = {
-    ...state,
-    setVolume,
-    init,
-    play,
-  };
   return (
-    <AudioContext.Provider value={contextState}>
+    <AudioCtx.Provider value={{ init, play, setVolume, currentSong, volume }}>
       {children}
-    </AudioContext.Provider>
+    </AudioCtx.Provider>
   );
 }
 
-export function useAudioContext(): AudioContextState & AudioContextInnerState {
-  const state = useContext(AudioContext);
-  return {
-    ...state,
-  };
+export function useAudioContext() {
+  return useContext(AudioCtx);
 }

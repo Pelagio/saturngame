@@ -1,36 +1,82 @@
-import { useEffect, createContext, useContext, useRef } from "react";
-const SOCKET_URL = "wss://servers.saturngame.se";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { env } from "../../lib/env";
 
-const webSocket = new WebSocket(SOCKET_URL);
+type SocketStatus = "connecting" | "open" | "closed";
 
-export const SocketContext = createContext<WebSocket | undefined >(webSocket);
-
-interface ISocketProvider {
-  children: React.ReactChild;
+interface SocketContextValue {
+  socket: WebSocket | null;
+  status: SocketStatus;
 }
 
-export const SocketProvider = (props: ISocketProvider) => {
-  const ws = useRef<WebSocket>();
+const SocketContext = createContext<SocketContextValue>({
+  socket: null,
+  status: "closed",
+});
+
+export function SocketProvider({ children }: { children: ReactNode }) {
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectTimer = useRef<ReturnType<typeof setTimeout>>();
+  const reconnectAttempt = useRef(0);
+  const [, forceUpdate] = useState(0);
 
   useEffect(() => {
-      ws.current = new WebSocket(SOCKET_URL);
-      ws.current.onopen = () => console.log("ws opened");
-      ws.current.onclose = () => console.log("ws closed");
+    function connect() {
+      const ws = new WebSocket(env.wsUrl);
 
-      const wsCurrent = ws.current;
-
-      return () => {
-          wsCurrent.close();
+      ws.onopen = () => {
+        reconnectAttempt.current = 0;
+        wsRef.current = ws;
+        forceUpdate((n) => n + 1);
       };
+
+      ws.onclose = () => {
+        wsRef.current = null;
+        forceUpdate((n) => n + 1);
+        const delay = Math.min(
+          1000 * Math.pow(2, reconnectAttempt.current),
+          30000,
+        );
+        reconnectAttempt.current++;
+        reconnectTimer.current = setTimeout(connect, delay);
+      };
+
+      ws.onerror = () => {
+        ws.close();
+      };
+    }
+
+    connect();
+
+    return () => {
+      clearTimeout(reconnectTimer.current);
+      wsRef.current?.close();
+      wsRef.current = null;
+    };
   }, []);
 
+  const status: SocketStatus =
+    wsRef.current?.readyState === WebSocket.OPEN ? "open" : "closed";
+
   return (
-    <SocketContext.Provider value={ws.current}>{props.children}</SocketContext.Provider>
+    <SocketContext.Provider value={{ socket: wsRef.current, status }}>
+      {children}
+    </SocketContext.Provider>
   );
-};
+}
 
-export const useSocket = () => {
-  const socket = useContext(SocketContext);
-
+export function useSocket(): WebSocket | null {
+  const { socket } = useContext(SocketContext);
   return socket;
-};
+}
+
+export function useSocketStatus(): SocketStatus {
+  const { status } = useContext(SocketContext);
+  return status;
+}

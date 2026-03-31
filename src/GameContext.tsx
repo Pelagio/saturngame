@@ -1,134 +1,114 @@
 import {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
-  useMemo,
   useState,
 } from "react";
 import { useAudioContext } from "./AudioContext";
 import { SimpleApi } from "./utils/simple-api/simple-api";
 import { useSocket } from "./utils/ws/ws";
+import { Song } from "./types/game";
 
-export interface Song {
-  song_id: string;
-  artist_name: string;
-  name: string;
-  preview_url: string;
-  image_url: string;
-  year: number;
-}
-
-interface GameContextInnerState {
-  correctAnswers?: Song[];
-}
-
-export interface GameContextState {
+interface GameContextState {
   lockAnswer: (gameId: string, answer: number) => void;
-  newGame: () => void;
+  newGame: () => Promise<string>;
   startGame: (gameId?: string) => void;
   joinGame: (gameId: string, guest?: boolean) => void;
   currentSong?: Song;
+  correctAnswers?: Song[];
 }
 
-export const GameContext = createContext<GameContextState>({
+const GameContext = createContext<GameContextState>({
   lockAnswer: () => {},
-  newGame: () => {},
+  newGame: async () => "",
   startGame: () => {},
   joinGame: () => {},
 });
 
-export function GameProvider({
-  children,
-}: {
-  children: ReactNode;
-}): React.ReactElement {
-  let socket = useSocket();
+export function GameProvider({ children }: { children: ReactNode }) {
+  const socket = useSocket();
+  const { play } = useAudioContext();
+  const [correctAnswers, setCorrectAnswers] = useState<Song[]>([]);
+  const [currentSong, setCurrentSong] = useState<Song>();
 
-  const { play, currentSong } = useAudioContext();
-  const [state, setState] = useState<GameContextInnerState>({
-    correctAnswers: [],
-  });
-
-  const nextSong = useMemo(
-    () => (song: Song) => {
-      play(song);
-    },
-    [play]
-  );
-
-  const lockAnswer = useMemo(
-    () => (gameId: string, answer: number) => {
+  const lockAnswer = useCallback(
+    (gameId: string, answer: number) => {
       socket?.send(JSON.stringify({ command: "LOCK_ANSWER", answer, gameId }));
     },
-    [socket]
+    [socket],
   );
 
-  const newGame = async () => {
+  const newGame = useCallback(async () => {
     const api = new SimpleApi();
     const { data = { gameId: "single" } } = await api.newGame();
-    const { gameId } = data;
-    return gameId;
-  };
+    return data.gameId;
+  }, []);
 
-  useEffect(() => {
-    if (socket) {
-      socket.onmessage = (msg) => {
-        const data = JSON.parse(msg.data);
-        const { player } = data;
-        if (player) {
-          const { correctAnswers: ca } = player;
-          setState((currentState) => ({ ...currentState, correctAnswers: ca }));
-        }
-        switch (data.command) {
-          case "START":
-            nextSong(data.song);
-            break;
-          case "NEW_SONG":
-            nextSong(data.song);
-            break;
-          case "MATCH_FINISHED":
-            alert(data.winner ? "You won!" : "You lost!");
-            break;
-          default:
-            return;
-        }
-      };
-    }
-  }, [socket, lockAnswer, nextSong]);
-
-  const startGame = useMemo(
-    () => (gameId?: string) => {
+  const startGame = useCallback(
+    (gameId?: string) => {
       socket?.send(JSON.stringify({ command: "REQUEST_START", gameId }));
     },
-    [socket]
+    [socket],
   );
 
-  const joinGame = useMemo(
-    () => (gameId: string, guest?: boolean) => {
+  const joinGame = useCallback(
+    (gameId: string, guest?: boolean) => {
       socket?.send(
-        JSON.stringify({ command: guest ? "JOIN_GUEST" : "JOIN", gameId })
+        JSON.stringify({ command: guest ? "JOIN_GUEST" : "JOIN", gameId }),
       );
     },
-    [socket]
+    [socket],
   );
 
-  const contextState = {
-    ...state,
-    currentSong,
-    lockAnswer,
-    newGame,
-    startGame,
-    joinGame,
-  };
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.onmessage = (msg) => {
+      let data;
+      try {
+        data = JSON.parse(msg.data);
+      } catch {
+        return;
+      }
+
+      if (data.player?.correctAnswers) {
+        setCorrectAnswers(data.player.correctAnswers);
+      }
+
+      switch (data.command) {
+        case "START":
+        case "NEW_SONG":
+          play(data.song);
+          setCurrentSong(data.song);
+          break;
+        case "MATCH_FINISHED":
+          setCurrentSong(undefined);
+          alert(data.winner ? "You won!" : "You lost!");
+          break;
+        default:
+          break;
+      }
+    };
+  }, [socket, play]);
+
   return (
-    <GameContext.Provider value={contextState}>{children}</GameContext.Provider>
+    <GameContext.Provider
+      value={{
+        lockAnswer,
+        newGame,
+        startGame,
+        joinGame,
+        currentSong,
+        correctAnswers,
+      }}
+    >
+      {children}
+    </GameContext.Provider>
   );
 }
 
-export function useGameContext(): GameContextState & GameContextInnerState {
-  const state = useContext(GameContext);
-  return {
-    ...state,
-  };
+export function useGameContext() {
+  return useContext(GameContext);
 }

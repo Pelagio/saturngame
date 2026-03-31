@@ -3,8 +3,10 @@ import QRCode from "react-qr-code";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import "./App.css";
 
-import { AudioProvider, Song, useAudioContext } from "./AudioContext";
+import { AudioProvider, useAudioContext } from "./AudioContext";
 import { GameProvider, useGameContext } from "./GameContext";
+import { SocketProvider } from "./utils/ws/ws";
+import { Song } from "./types/game";
 
 export const getOrigin = () => {
   if (typeof window !== "undefined") {
@@ -47,7 +49,7 @@ function SongPin({ song }: { song: Partial<Song> }) {
 }
 
 function Timeline() {
-  let { gameId } = useParams();
+  const { gameId } = useParams();
   const {
     currentSong,
     lockAnswer,
@@ -71,7 +73,6 @@ function Timeline() {
 
   return (
     <div className="Timeline">
-      {/* <h1>{currentSong?.year}</h1> */}
       <Segment
         onClick={onSegmentPress}
         index={0}
@@ -79,7 +80,7 @@ function Timeline() {
         selected={selectedSegment === 0}
       />
       {years.map((y, index) => (
-        <React.Fragment key={`${y.song_id}`}>
+        <React.Fragment key={y.song_id}>
           <SongPin song={y} />
           <Segment
             onClick={onSegmentPress}
@@ -94,9 +95,8 @@ function Timeline() {
 }
 
 function MobileTimeline() {
-  let { gameId } = useParams();
-
-  const timeline: MutableRefObject<any> = React.useRef(null);
+  const { gameId } = useParams();
+  const timeline: MutableRefObject<HTMLDivElement | null> = React.useRef(null);
   const {
     currentSong,
     lockAnswer,
@@ -107,10 +107,6 @@ function MobileTimeline() {
     lockAnswer(gameId || "", segmentIndex);
   };
 
-  useEffect(() => {
-    // timeline.current?.scrollTo({top: years.length * 31} )
-  }, [years.length]);
-
   if (!currentSong) {
     return null;
   }
@@ -119,25 +115,32 @@ function MobileTimeline() {
     <div className="Timeline">
       <div className="Timeline-Cursor">
         <h2>AFTER:</h2>
-        <div style={{width: "100%", height: "2px", backgroundColor: "white"}}></div>
+        <div
+          style={{ width: "100%", height: "2px", backgroundColor: "white" }}
+        />
         <h2>BEFORE:</h2>
       </div>
-      <div className="Timeline-LockButton" onClick={() => {
-        const { scrollTop } = timeline.current;
-        const selectedIndex = Math.round(scrollTop / 62);
-          onSegmentPress(selectedIndex)
-        }}>LOCK</div>
+      <div
+        className="Timeline-LockButton"
+        onClick={() => {
+          const scrollTop = timeline.current?.scrollTop ?? 0;
+          const selectedIndex = Math.round(scrollTop / 62);
+          onSegmentPress(selectedIndex);
+        }}
+      >
+        LOCK
+      </div>
       <div className="Timeline-List" ref={timeline}>
-      <div className="Timeline-List-Spacer" />
-      <div className="Timeline-List-Spacer" />
-      {[...years].map((y, index) => (
-        <React.Fragment key={`${y.song_id}`}>
-          <SongPin song={y} />
-        </React.Fragment>
-      ))}
-      <div className="Timeline-List-Spacer" />
-      <div className="Timeline-List-Spacer" />
-      <div className="Timeline-List-Spacer" />
+        <div className="Timeline-List-Spacer" />
+        <div className="Timeline-List-Spacer" />
+        {[...years].map((y) => (
+          <React.Fragment key={y.song_id}>
+            <SongPin song={y} />
+          </React.Fragment>
+        ))}
+        <div className="Timeline-List-Spacer" />
+        <div className="Timeline-List-Spacer" />
+        <div className="Timeline-List-Spacer" />
       </div>
     </div>
   );
@@ -166,19 +169,19 @@ function SoundOffIcon() {
               <path
                 d="M341.5,192 C341.5,214.717 336.617,236.362 327.897,255.855 L359.777,287.735 C375.283,259.33 384,226.653 384,192 C384,98.744 320,19.746 235,0 L235,44.978 C297,63.632 341.5,122.882 341.5,192 L341.5,192 Z"
                 id="Shape"
-              ></path>
+              />
               <polygon
                 id="Shape"
                 points="192 16.458 140.979 68.938 192 119.957"
-              ></polygon>
+              />
               <path
                 d="M356.842,332.885 L27.116,3.157 L3.116,27.157 L93.615,117.57 L85.335,128 L0,128 L0,256 L85.334,256 L192,367.543 L192,216 L286.915,310.686 C271.795,323.443 254,333.213 235,339.022 L235,384 C266,376.828 293.996,361.837 317.315,341.191 L356.925,380.884 L380.925,356.841 L356.923,332.802 L356.842,332.885 L356.842,332.885 Z"
                 id="Shape"
-              ></path>
+              />
               <path
                 d="M288.188,192 C288.188,153.601 267,119.593 235,103.137 L235,162.957 L285.801,213.758 C287.355,206.739 288.188,199.454 288.188,192 L288.188,192 Z"
                 id="Shape"
-              ></path>
+              />
             </g>
           </g>
         </g>
@@ -203,7 +206,7 @@ function SoundOnIcon() {
             <path
               d="M0,128 L0,256 L85.334,256 L192,367.543 L192,16.458 L85.334,128 L0,128 L0,128 Z M288,192 C288,153.601 266.667,119.593 234.667,103.137 L234.667,279.773 C266.667,264.408 288,230.4 288,192 L288,192 Z M234.667,0 L234.667,44.978 C296.531,63.632 341.334,122.882 341.334,192 C341.334,261.119 296.531,320.369 234.667,339.022 L234.667,384 C320,364.254 384,285.257 384,192 C384,98.744 320,19.746 234.667,0 L234.667,0 Z"
               id="Shape"
-            ></path>
+            />
           </g>
         </g>
       </g>
@@ -218,7 +221,7 @@ function Cover() {
       key={currentSong?.song_id}
       className="Cover"
       style={{ backgroundImage: `url(${currentSong?.image_url})` }}
-    ></div>
+    />
   );
 }
 
@@ -236,22 +239,21 @@ function MuteButton() {
 }
 
 function Game() {
-  let navigate = useNavigate();
-  let { gameId } = useParams();
+  const navigate = useNavigate();
+  const { gameId } = useParams();
 
   const gameContext = useGameContext();
   const audioContext = useAudioContext();
 
   const [allowPlayback, setAllowPlayback] = useState(false);
   const [gameRunning, setGameRunning] = useState(false);
-
   const [playerReady, setPlayerReady] = useState(false);
 
   const startGame = useMemo(
     () => () => {
       gameContext.startGame(gameId);
     },
-    [gameContext, gameId]
+    [gameContext, gameId],
   );
 
   useEffect(() => {
@@ -259,7 +261,7 @@ function Game() {
       setGameRunning(true);
       startGame();
     }
-  }, [allowPlayback, startGame, setGameRunning, gameRunning]);
+  }, [allowPlayback, startGame, gameRunning]);
 
   useEffect(() => {
     setPlayerReady(false);
@@ -273,18 +275,21 @@ function Game() {
   const onReadyPress = () => {
     audioContext.init();
     setPlayerReady(true);
-    gameContext.joinGame(gameId!);
+    gameContext.joinGame(gameId);
   };
 
   const onWatchPress = () => {
     audioContext.init();
     setPlayerReady(true);
-    gameContext.joinGame(gameId!, true);
+    gameContext.joinGame(gameId, true);
   };
 
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   return (
-    <div className="Game" style={!gameContext.currentSong ? {justifyContent: "flex-start"}: {}}>
+    <div
+      className="Game"
+      style={!gameContext.currentSong ? { justifyContent: "flex-start" } : {}}
+    >
       <MuteButton />
       <Cover />
       {!gameContext.currentSong && (
@@ -312,7 +317,7 @@ function Game() {
 }
 
 function New() {
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   const { newGame } = useGameContext();
   const onNewGamePress = async () => {
     const gameId = await newGame();
@@ -328,17 +333,19 @@ function New() {
 function App() {
   return (
     <div className="App">
-      <AudioProvider>
-        <GameProvider>
-          <header className="App-header">
-            <h1>SATURNUS</h1>
-          </header>
-          <Routes>
-            <Route path="/" element={<New />} />
-            <Route path="game/:gameId" element={<Game />} />
-          </Routes>
-        </GameProvider>
-      </AudioProvider>
+      <SocketProvider>
+        <AudioProvider>
+          <GameProvider>
+            <header className="App-header">
+              <h1>SATURNUS</h1>
+            </header>
+            <Routes>
+              <Route path="/" element={<New />} />
+              <Route path="game/:gameId" element={<Game />} />
+            </Routes>
+          </GameProvider>
+        </AudioProvider>
+      </SocketProvider>
     </div>
   );
 }
