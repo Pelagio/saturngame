@@ -1,9 +1,22 @@
 .App {
   text-align: center;
-  background-color: #0b4e63;
+  background-color: var(--color-bg);
   height: 100vh;
   overflow: hidden;
-  color: white;
+  color: var(--color-text);
+}
+
+/* Screen-reader only utility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .App-header {
@@ -16,13 +29,15 @@
 /* --- Buttons --- */
 
 .btn {
-  font-family: "Ruslan Display", serif;
+  font-family: var(--font-display);
   font-size: 18px;
   padding: 12px 32px;
   border: none;
   border-radius: 10px;
   cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s;
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
 }
 
 .btn:hover {
@@ -34,14 +49,14 @@
 }
 
 .btn-primary {
-  background-color: goldenrod;
-  color: #001219;
+  background-color: var(--color-gold);
+  color: var(--color-bg-deep);
 }
 
 .btn-secondary {
   background-color: transparent;
   color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid var(--color-border);
 }
 
 .btn-secondary:hover {
@@ -59,7 +74,7 @@
 }
 
 .Home-subtitle {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-text-muted);
   font-size: 18px;
   margin: 0;
 }
@@ -74,23 +89,23 @@
 }
 
 .NameEntry-input {
-  font-family: "Ruslan Display", serif;
+  font-family: var(--font-display);
   font-size: 18px;
   padding: 12px 20px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid var(--color-border);
   border-radius: 10px;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--color-surface);
   color: white;
   outline: none;
   width: 200px;
 }
 
 .NameEntry-input:focus {
-  border-color: goldenrod;
+  border-color: var(--color-gold);
 }
 
 .NameEntry-input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--color-text-dim);
 }
 
 /* --- Lobby --- */
@@ -114,7 +129,7 @@
 
 .Lobby-label {
   font-size: 16px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-text-muted);
 }
 
 .Lobby-players {
@@ -145,19 +160,19 @@
 }
 
 .PlayerList-item {
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--color-surface);
   padding: 8px 16px;
   border-radius: 8px;
-  font-family: "Ruslan Display", serif;
+  font-family: var(--font-display);
   font-size: 18px;
 }
 
 /* --- Score Bar --- */
 
 .ScoreBar {
-  font-family: "Ruslan Display", serif;
+  font-family: var(--font-display);
   font-size: 20px;
-  color: goldenrod;
+  color: var(--color-gold);
   padding: 8px 0;
 }
 
@@ -192,14 +207,14 @@
 }
 
 .RoundResult-artist {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-text-muted);
   margin: 0;
   font-size: 18px;
 }
 
 .RoundResult-year {
-  color: goldenrod;
-  font-family: "Ruslan Display", serif;
+  color: var(--color-gold);
+  font-family: var(--font-display);
   font-size: 24px;
   margin: 0;
 }
@@ -233,16 +248,16 @@
 }
 
 .RoundResult-player.correct .RoundResult-icon {
-  color: #4cc27a;
+  color: var(--color-correct);
 }
 
 .RoundResult-player.wrong .RoundResult-icon {
-  color: #e05252;
+  color: var(--color-wrong);
 }
 
 .RoundResult-score {
-  color: goldenrod;
-  font-family: "Ruslan Display", serif;
+  color: var(--color-gold);
+  font-family: var(--font-display);
 }
 
 /* --- Game Over --- */
@@ -257,13 +272,13 @@
 }
 
 .GameOver-label {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-text-muted);
   font-size: 18px;
   margin: 0;
 }
 
 .GameOver-winner {
-  color: goldenrod;
+  color: var(--color-gold);
   font-size: 48px;
   margin: 0;
 }
@@ -282,7 +297,7 @@
   gap: 12px;
   padding: 12px 16px;
   border-radius: 8px;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--color-surface);
   font-size: 18px;
 }
 
@@ -299,12 +314,12 @@
 .GameOver-name {
   flex: 1;
   text-align: left;
-  font-family: "Ruslan Display", serif;
+  font-family: var(--font-display);
 }
 
 .GameOver-score {
-  color: goldenrod;
-  font-family: "Ruslan Display", serif;
+  color: var(--color-gold);
+  font-family: var(--font-display);
   font-size: 24px;
 }
 
@@ -406,7 +421,7 @@ h1,
 h2,
 h3,
 span {
-  font-family: "Ruslan Display";
+  font-family: var(--font-display);
 }
 
 h1 {
@@ -486,7 +501,7 @@ h1 {
   height: 100px;
   width: 100px;
   border-radius: 50px;
-  background-color: #001219;
+  background-color: var(--color-bg-deep);
   box-shadow: 0px 0px 15px 14px rgba(0, 95, 115, 0.2);
   display: flex;
   align-items: center;
@@ -531,4 +546,7 @@ h1 {
   top: 20px;
   right: 20px;
   cursor: pointer;
+  background: none;
+  border: none;
+  padding: var(--space-sm);
 }

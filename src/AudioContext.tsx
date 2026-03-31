@@ -60,7 +60,9 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   }, [volume]);
 
   return (
-    <AudioCtx.Provider value={{ init, play, stop, setVolume, currentSong, volume }}>
+    <AudioCtx.Provider
+      value={{ init, play, stop, setVolume, currentSong, volume }}
+    >
       {children}
     </AudioCtx.Provider>
   );
