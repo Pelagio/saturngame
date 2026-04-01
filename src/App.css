@@ -184,7 +184,11 @@ span {
 }
 
 .Home-tab.active {
-  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-bright, #a855f7));
+  background: linear-gradient(
+    135deg,
+    var(--color-accent),
+    var(--color-accent-bright, #a855f7)
+  );
   color: white;
   box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
 }
@@ -222,6 +226,25 @@ span {
 
 .Home-party-info li {
   padding-left: 4px;
+}
+
+.Home-party-info h3 {
+  font-size: var(--text-lg);
+  margin: 0 0 var(--space-sm);
+}
+
+.Home-divider {
+  color: var(--color-text-dim);
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.Home-join {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  animation: fadeIn 0.2s ease;
 }
 
 .Home-daily {

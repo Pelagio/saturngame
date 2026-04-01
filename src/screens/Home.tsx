@@ -25,6 +25,8 @@ export function Home() {
   const [selectedDecade, setSelectedDecade] = useState<number | undefined>();
   const [showModes, setShowModes] = useState(false);
   const [tab, setTab] = useState<Tab>("solo");
+  const [showJoin, setShowJoin] = useState(false);
+  const [joinCode, setJoinCode] = useState("");
 
   const dailyPlayed = localStorage.getItem(
     `saturn_daily_${new Date().toISOString().slice(0, 10)}`,
@@ -137,17 +139,58 @@ export function Home() {
       {tab === "party" && (
         <div className="Home-section">
           <div className="Home-party-info">
-            <p>Play together on the big screen.</p>
+            <h3>Host a game</h3>
             <ol>
               <li>Click "Start Party" below</li>
-              <li>A TV display opens in a new tab — put it on the big screen</li>
+              <li>
+                A TV display opens in a new tab — put it on the big screen
+              </li>
               <li>Friends scan the QR code with their phones to join</li>
-              <li>Everyone plays on their phone, the TV shows the game</li>
             </ol>
           </div>
           <button className="btn btn-primary" onClick={startParty}>
             Start Party
           </button>
+
+          <div className="Home-divider">or</div>
+
+          <button
+            className="btn btn-secondary"
+            onClick={() => setShowJoin(!showJoin)}
+          >
+            {showJoin ? "Cancel" : "Join a Game"}
+          </button>
+
+          {showJoin && (
+            <form
+              className="Home-join"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const code = joinCode.trim();
+                if (code) {
+                  // Support full URL or just the game ID
+                  const gameId = code.includes("/game/")
+                    ? code.split("/game/")[1]?.split("?")[0]
+                    : code;
+                  if (gameId) {
+                    navigate(`/game/${gameId}?mode=controller`);
+                  }
+                }
+              }}
+            >
+              <input
+                className="NameEntry-input"
+                type="text"
+                placeholder="Paste game link or code"
+                value={joinCode}
+                onChange={(e) => setJoinCode(e.target.value)}
+                autoFocus
+              />
+              <button className="btn btn-primary" type="submit">
+                Join
+              </button>
+            </form>
+          )}
         </div>
       )}
 
