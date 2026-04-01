@@ -669,6 +669,80 @@ span {
   padding: var(--space-xl) var(--space-lg);
 }
 
+/* --- Leave Button --- */
+
+.LeaveButton {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  border: 1px solid var(--color-surface-border);
+  color: var(--color-text);
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 10;
+}
+
+.LeaveButton:hover {
+  background: var(--color-surface-raised);
+}
+
+.LeaveConfirm {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: var(--color-bg-mid, #13131f);
+  border: 1px solid var(--color-surface-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-md);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  animation: fadeIn 0.2s ease;
+}
+
+.LeaveConfirm p {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-display);
+  font-size: var(--text-base);
+}
+
+.LeaveConfirm-actions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.LeaveConfirm-actions .btn {
+  font-size: var(--text-sm);
+  padding: 8px 16px;
+}
+
+/* In controller header, leave button is inline not absolute */
+.Controller-header .LeaveButton {
+  position: static;
+  flex-shrink: 0;
+}
+
+.Controller-header .LeaveConfirm {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  align-items: center;
+}
+
 /* --- Album Cover --- */
 
 .Cover {

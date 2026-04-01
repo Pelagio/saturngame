@@ -13,6 +13,47 @@ import { RoundResult } from "./RoundResult";
 import { GameOver } from "./GameOver";
 import { ControllerGame } from "./ControllerGame";
 
+function LeaveButton() {
+  const navigate = useNavigate();
+  const { playAgain } = useGameContext();
+  const [confirming, setConfirming] = useState(false);
+
+  if (confirming) {
+    return (
+      <div className="LeaveConfirm">
+        <p>Leave this game?</p>
+        <div className="LeaveConfirm-actions">
+          <button
+            className="btn btn-primary"
+            onClick={() => {
+              playAgain();
+              navigate("/");
+            }}
+          >
+            Leave
+          </button>
+          <button
+            className="btn btn-secondary"
+            onClick={() => setConfirming(false)}
+          >
+            Stay
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      className="LeaveButton"
+      onClick={() => setConfirming(true)}
+      aria-label="Leave game"
+    >
+      &larr;
+    </button>
+  );
+}
+
 export function Game() {
   const navigate = useNavigate();
   const { gameId } = useParams();
@@ -25,9 +66,10 @@ export function Game() {
   const [joined, setJoined] = useState(false);
   const hasAutoJoined = useRef(false);
 
-  // Auto-rejoin on page reload if the player has a stored name and the socket opens
+  // Auto-rejoin on page reload — only for full game mode, not controller
   useEffect(() => {
     if (
+      !isController &&
       !hasAutoJoined.current &&
       socketStatus === "open" &&
       gameId &&
@@ -35,24 +77,29 @@ export function Game() {
     ) {
       hasAutoJoined.current = true;
       audioContext.init();
-      gameContext.joinGame(gameId, false, gameContext.playerName, gameContext.playerAvatar);
+      gameContext.joinGame(
+        gameId,
+        false,
+        gameContext.playerName,
+        gameContext.playerAvatar,
+      );
       setJoined(true);
     }
-  }, [socketStatus, gameId, gameContext, audioContext]);
+  }, [isController, socketStatus, gameId, gameContext, audioContext]);
 
   if (!gameId) {
     navigate("/");
     return <></>;
   }
 
-  // Controller mode — lightweight phone UI
+  // Controller mode — fully handled by ControllerGame
   if (isController) {
     return <ControllerGame />;
   }
 
-  // --- Full game mode (desktop / standalone) ---
+  // --- Full game mode ---
 
-  // Not joined yet — show name entry
+  // Not joined yet
   if (!joined) {
     return (
       <div className="Game" style={{ justifyContent: "center" }}>
@@ -82,6 +129,7 @@ export function Game() {
   if (gameContext.phase === "lobby") {
     return (
       <div className="Game">
+        <LeaveButton />
         <Lobby gameId={gameId} />
       </div>
     );
@@ -108,6 +156,7 @@ export function Game() {
   // Playing
   return (
     <div className="Game">
+      <LeaveButton />
       <MuteButton />
       <Cover />
       <ScoreBar />
