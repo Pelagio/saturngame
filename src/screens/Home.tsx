@@ -15,6 +15,8 @@ const DECADES = [
   { label: "10s", value: 2010 },
 ];
 
+type Tab = "solo" | "party";
+
 export function Home() {
   const navigate = useNavigate();
   const { newGame, playerName } = useGameContext();
@@ -22,6 +24,7 @@ export function Home() {
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [selectedDecade, setSelectedDecade] = useState<number | undefined>();
   const [showModes, setShowModes] = useState(false);
+  const [tab, setTab] = useState<Tab>("solo");
 
   const dailyPlayed = localStorage.getItem(
     `saturn_daily_${new Date().toISOString().slice(0, 10)}`,
@@ -32,79 +35,120 @@ export function Home() {
     navigate(`/game/${gameId}`);
   };
 
+  const startParty = async () => {
+    const gameId = await newGame();
+    // Open TV display in new tab, navigate to lobby
+    window.open(`${window.location.origin}/tv/${gameId}`, "_blank");
+    navigate(`/game/${gameId}`);
+  };
+
   return (
     <div className="Home">
       <p className="Home-subtitle">The music timeline game</p>
 
-      {/* Main actions */}
-      <button className="btn btn-primary" onClick={() => startGame()}>
-        New Game
-      </button>
+      {/* Tab switcher */}
+      <div className="Home-tabs">
+        <button
+          className={`Home-tab ${tab === "solo" ? "active" : ""}`}
+          onClick={() => setTab("solo")}
+        >
+          Solo
+        </button>
+        <button
+          className={`Home-tab ${tab === "party" ? "active" : ""}`}
+          onClick={() => setTab("party")}
+        >
+          Party
+        </button>
+      </div>
 
-      <button
-        className="btn btn-primary Home-daily"
-        onClick={() => {
-          if (dailyPlayed) return;
-          startGame(undefined, true);
-        }}
-        disabled={!!dailyPlayed}
-      >
-        {dailyPlayed ? "Daily Done" : "Daily Challenge"}
-      </button>
-
-      {/* Mode picker toggle */}
-      <button
-        className="btn btn-secondary"
-        onClick={() => setShowModes(!showModes)}
-      >
-        {showModes ? "Hide Modes" : "Game Modes"}
-      </button>
-
-      {showModes && (
-        <div className="Home-modes">
-          {/* Decade filter */}
-          <div className="Home-decades">
-            {DECADES.map((d) => (
-              <button
-                key={d.label}
-                className={`Home-decade-btn ${selectedDecade === d.value ? "selected" : ""}`}
-                onClick={() => setSelectedDecade(d.value)}
-              >
-                {d.label}
-              </button>
-            ))}
-          </div>
+      {tab === "solo" && (
+        <div className="Home-section">
+          <button className="btn btn-primary" onClick={() => startGame()}>
+            Quick Play
+          </button>
 
           <button
-            className="btn btn-primary"
-            onClick={() =>
-              startGame(selectedDecade ? { decade: selectedDecade } : undefined)
-            }
+            className="btn btn-primary Home-daily"
+            onClick={() => {
+              if (dailyPlayed) return;
+              startGame(undefined, true);
+            }}
+            disabled={!!dailyPlayed}
           >
-            Start {selectedDecade ? `${selectedDecade}s` : "Classic"}
+            {dailyPlayed ? "Daily Done" : "Daily Challenge"}
           </button>
 
           <button
             className="btn btn-secondary"
-            onClick={() => startGame({ hardMode: true })}
+            onClick={() => setShowModes(!showModes)}
           >
-            Hard Mode
+            {showModes ? "Hide Modes" : "Game Modes"}
           </button>
+
+          {showModes && (
+            <div className="Home-modes">
+              <div className="Home-decades">
+                {DECADES.map((d) => (
+                  <button
+                    key={d.label}
+                    className={`Home-decade-btn ${selectedDecade === d.value ? "selected" : ""}`}
+                    onClick={() => setSelectedDecade(d.value)}
+                  >
+                    {d.label}
+                  </button>
+                ))}
+              </div>
+              <button
+                className="btn btn-primary"
+                onClick={() =>
+                  startGame(
+                    selectedDecade ? { decade: selectedDecade } : undefined,
+                  )
+                }
+              >
+                Start {selectedDecade ? `${selectedDecade}s` : "Classic"}
+              </button>
+              <button
+                className="btn btn-secondary"
+                onClick={() => startGame({ hardMode: true })}
+              >
+                Hard Mode
+              </button>
+            </div>
+          )}
+
+          <button
+            className="btn btn-secondary"
+            onClick={() => setShowLeaderboard(!showLeaderboard)}
+          >
+            {showLeaderboard ? "Hide Leaderboard" : "Leaderboard"}
+          </button>
+
+          {showLeaderboard && (
+            <Leaderboard
+              date={new Date().toISOString().slice(0, 10)}
+              playerName={playerName}
+            />
+          )}
         </div>
       )}
 
-      <button
-        className="btn btn-secondary"
-        onClick={() => setShowLeaderboard(!showLeaderboard)}
-      >
-        {showLeaderboard ? "Hide Leaderboard" : "Leaderboard"}
-      </button>
-
-      {showLeaderboard && (
-        <Leaderboard
-          date={new Date().toISOString().slice(0, 10)}
-          playerName={playerName}
-        />
+      {tab === "party" && (
+        <div className="Home-section">
+          <div className="Home-party-info">
+            <p>Play together on the big screen.</p>
+            <ol>
+              <li>Click "Start Party" below</li>
+              <li>A TV display opens in a new tab — put it on the big screen</li>
+              <li>Friends scan the QR code with their phones to join</li>
+              <li>Everyone plays on their phone, the TV shows the game</li>
+            </ol>
+          </div>
+          <button className="btn btn-primary" onClick={startParty}>
+            Start Party
+          </button>
+        </div>
       )}
 
       <button className="btn btn-secondary" onClick={() => setShowHowTo(true)}>
