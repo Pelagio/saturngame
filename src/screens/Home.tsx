@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGameContext } from "../GameContext";
 import { HowToPlay } from "./HowToPlay";
+import { Leaderboard } from "../components/Leaderboard";
 import { MatchFilter } from "../types/game";
 
 const DECADES = [
@@ -16,8 +17,9 @@ const DECADES = [
 
 export function Home() {
   const navigate = useNavigate();
-  const { newGame } = useGameContext();
+  const { newGame, playerName } = useGameContext();
   const [showHowTo, setShowHowTo] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [selectedDecade, setSelectedDecade] = useState<number | undefined>();
   const [showModes, setShowModes] = useState(false);
 
@@ -76,9 +78,7 @@ export function Home() {
           <button
             className="btn btn-primary"
             onClick={() =>
-              startGame(
-                selectedDecade ? { decade: selectedDecade } : undefined,
-              )
+              startGame(selectedDecade ? { decade: selectedDecade } : undefined)
             }
           >
             Start {selectedDecade ? `${selectedDecade}s` : "Classic"}
@@ -91,6 +91,20 @@ export function Home() {
             Hard Mode
           </button>
         </div>
+      )}
+
+      <button
+        className="btn btn-secondary"
+        onClick={() => setShowLeaderboard(!showLeaderboard)}
+      >
+        {showLeaderboard ? "Hide Leaderboard" : "Leaderboard"}
+      </button>
+
+      {showLeaderboard && (
+        <Leaderboard
+          date={new Date().toISOString().slice(0, 10)}
+          playerName={playerName}
+        />
       )}
 
       <button className="btn btn-secondary" onClick={() => setShowHowTo(true)}>
