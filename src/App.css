@@ -549,10 +549,61 @@ span {
   padding-top: max(12px, env(safe-area-inset-top));
 }
 
+.Controller-profile {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.Controller-profile:hover,
+.Controller-profile:focus-visible {
+  background: var(--color-surface);
+}
+
+.Controller-avatar {
+  font-size: 22px;
+  line-height: 1;
+}
+
 .Controller-name {
   font-family: var(--font-display);
   font-weight: var(--font-weight-display);
   font-size: var(--text-lg);
+  color: var(--color-text);
+}
+
+.Controller-edit-hint {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--color-text-dim);
+  font-weight: 500;
+}
+
+/* Edit Profile */
+
+.EditProfile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-xl) var(--space-md);
+  flex: 1;
+  justify-content: center;
+}
+
+.EditProfile h2 {
+  margin: 0;
+}
+
+.EditProfile-actions {
+  display: flex;
+  gap: var(--space-sm);
 }
 
 .Controller-result {

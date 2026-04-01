@@ -5,12 +5,14 @@ import { useAudioContext } from "../AudioContext";
 import { ScoreBar } from "../components/ScoreBar";
 import { Timeline } from "../components/Timeline";
 import { NameEntry } from "./NameEntry";
+import { EditProfile } from "./EditProfile";
 
 export function ControllerGame() {
   const { gameId } = useParams();
   const gameContext = useGameContext();
   const audioContext = useAudioContext();
   const [joined, setJoined] = useState(false);
+  const [editing, setEditing] = useState(false);
 
   if (!gameId) return null;
 
@@ -30,19 +32,42 @@ export function ControllerGame() {
     );
   }
 
+  // Edit profile overlay
+  if (editing) {
+    return (
+      <div className="Controller">
+        <EditProfile
+          gameId={gameId}
+          onClose={() => setEditing(false)}
+        />
+      </div>
+    );
+  }
+
+  // Tappable profile header
+  const profileHeader = (
+    <button className="Controller-profile" onClick={() => setEditing(true)}>
+      {gameContext.playerAvatar && (
+        <span className="Controller-avatar">{gameContext.playerAvatar}</span>
+      )}
+      <span className="Controller-name">{gameContext.playerName}</span>
+      <span className="Controller-edit-hint">edit</span>
+    </button>
+  );
+
   // Waiting in lobby
   if (gameContext.phase === "lobby") {
     return (
       <div className="Controller">
         <div className="Controller-waiting">
-          <h2>{gameContext.playerName}</h2>
+          {profileHeader}
           <p className="Controller-status">Waiting for game to start...</p>
           <div className="Controller-players">
             {gameContext.players
               .filter((p) => !p.guest)
               .map((p) => (
                 <span key={p.id} className="Controller-player-badge">
-                  {p.name}
+                  {p.avatar && <span>{p.avatar}</span>} {p.name}
                 </span>
               ))}
           </div>
@@ -51,7 +76,7 @@ export function ControllerGame() {
     );
   }
 
-  // Round result — show brief feedback
+  // Round result
   if (gameContext.phase === "round_result" && gameContext.roundResult) {
     const { song, results } = gameContext.roundResult;
     const myResult = results.find((r) => r.name === gameContext.playerName);
@@ -92,11 +117,11 @@ export function ControllerGame() {
     );
   }
 
-  // Playing — show timeline + score
+  // Playing
   return (
     <div className="Controller">
       <div className="Controller-header">
-        <span className="Controller-name">{gameContext.playerName}</span>
+        {profileHeader}
         <ScoreBar />
       </div>
       <Timeline />
