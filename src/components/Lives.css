@@ -1,0 +1,18 @@
+.Lives {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.Lives-heart {
+  font-size: 18px;
+  line-height: 1;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
+}
+
+.Lives-heart.dead {
+  opacity: 0.3;
+  transform: scale(0.8);
+}

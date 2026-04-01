@@ -5,6 +5,8 @@ import { useAudioContext } from "../AudioContext";
 import { useSocketStatus } from "../utils/ws/ws";
 import { ScoreBar } from "../components/ScoreBar";
 import { Timeline } from "../components/Timeline";
+import { RoundTimer } from "../components/RoundTimer";
+import { Lives } from "../components/Lives";
 import { NameEntry } from "./NameEntry";
 import { EditProfile } from "./EditProfile";
 
@@ -198,6 +200,8 @@ export function ControllerGame() {
       <div className="Controller-header">
         <LeaveButton />
         {profileHeader}
+        <Lives />
+        <RoundTimer />
         <ScoreBar />
       </div>
       <Timeline />

@@ -1,0 +1,59 @@
+.RoundTimer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 48px;
+  height: 48px;
+}
+
+.RoundTimer-ring {
+  width: 48px;
+  height: 48px;
+}
+
+.RoundTimer-track {
+  stroke: var(--color-surface-border);
+}
+
+.RoundTimer-progress {
+  stroke: var(--color-accent-bright, #a855f7);
+  transition: stroke-dasharray 1s linear;
+}
+
+.RoundTimer.urgent .RoundTimer-progress {
+  stroke: var(--color-gold);
+}
+
+.RoundTimer.critical .RoundTimer-progress {
+  stroke: var(--color-wrong);
+}
+
+.RoundTimer.critical {
+  animation: timerPulse 0.5s ease-in-out infinite alternate;
+}
+
+.RoundTimer-text {
+  position: absolute;
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-display);
+  font-size: 14px;
+  color: var(--color-text);
+}
+
+.RoundTimer.urgent .RoundTimer-text {
+  color: var(--color-gold);
+}
+
+.RoundTimer.critical .RoundTimer-text {
+  color: var(--color-wrong);
+}
+
+@keyframes timerPulse {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.1);
+  }
+}

@@ -7,6 +7,8 @@ import { MuteButton } from "../components/MuteButton";
 import { Cover } from "../components/Cover";
 import { ScoreBar } from "../components/ScoreBar";
 import { Timeline } from "../components/Timeline";
+import { RoundTimer } from "../components/RoundTimer";
+import { Lives } from "../components/Lives";
 import { NameEntry } from "./NameEntry";
 import { Lobby } from "./Lobby";
 import { RoundResult } from "./RoundResult";
@@ -158,8 +160,12 @@ export function Game() {
     <div className="Game">
       <LeaveButton />
       <MuteButton />
+      <div className="Game-hud">
+        <Lives />
+        <RoundTimer />
+        <ScoreBar />
+      </div>
       <Cover />
-      <ScoreBar />
       <Timeline />
     </div>
   );

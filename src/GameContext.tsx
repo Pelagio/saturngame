@@ -18,6 +18,8 @@ export type GamePhase =
   | "round_result"
   | "game_over";
 
+export type RoundOutcome = "correct" | "wrong" | "timeout";
+
 interface RoundResultData {
   song: Song;
   results: PlayerResult[];
@@ -26,16 +28,25 @@ interface RoundResultData {
 interface GameOverData {
   winner?: { id: string; name: string };
   players: PlayerSummary[];
+  reason?: "lives" | "finished";
 }
+
+const MAX_LIVES = 3;
 
 interface GameContextState {
   // Actions
   lockAnswer: (gameId: string, answer: number) => void;
   newGame: () => Promise<string>;
   startGame: (gameId?: string) => void;
-  joinGame: (gameId: string, guest?: boolean, name?: string, avatar?: string) => void;
+  joinGame: (
+    gameId: string,
+    guest?: boolean,
+    name?: string,
+    avatar?: string,
+  ) => void;
   playAgain: () => void;
   updatePlayer: (gameId: string, name?: string, avatar?: string) => void;
+  onTimeout: (gameId: string) => void;
   // State
   phase: GamePhase;
   currentSong?: Song;
@@ -47,6 +58,10 @@ interface GameContextState {
   setPlayerName: (name: string) => void;
   playerAvatar: string;
   setPlayerAvatar: (avatar: string) => void;
+  // Single player
+  lives: number;
+  roundHistory: RoundOutcome[];
+  roundNumber: number;
 }
 
 const GameContext = createContext<GameContextState>({
@@ -56,12 +71,16 @@ const GameContext = createContext<GameContextState>({
   joinGame: () => {},
   playAgain: () => {},
   updatePlayer: () => {},
+  onTimeout: () => {},
   phase: "idle",
   players: [],
   playerName: "",
   setPlayerName: () => {},
   playerAvatar: "",
   setPlayerAvatar: () => {},
+  lives: MAX_LIVES,
+  roundHistory: [],
+  roundNumber: 0,
 });
 
 export function GameProvider({ children }: { children: ReactNode }) {
@@ -80,6 +99,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [playerAvatar, setPlayerAvatarState] = useState(
     () => localStorage.getItem("saturn_player_avatar") || "",
   );
+
+  // Single player state
+  const [lives, setLives] = useState(MAX_LIVES);
+  const [roundHistory, setRoundHistory] = useState<RoundOutcome[]>([]);
+  const [roundNumber, setRoundNumber] = useState(0);
 
   const setPlayerName = useCallback((name: string) => {
     setPlayerNameState(name);
@@ -129,6 +153,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
     [socket],
   );
 
+  const onTimeout = useCallback(
+    (gameId: string) => {
+      // Timer ran out — lock a deliberately wrong answer (segment -1 doesn't exist)
+      socket?.send(
+        JSON.stringify({ command: "LOCK_ANSWER", answer: -1, gameId }),
+      );
+    },
+    [socket],
+  );
+
   const playAgain = useCallback(() => {
     setPhase("idle");
     setCurrentSong(undefined);
@@ -136,6 +170,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setPlayers([]);
     setRoundResult(undefined);
     setGameOver(undefined);
+    setLives(MAX_LIVES);
+    setRoundHistory([]);
+    setRoundNumber(0);
   }, []);
 
   useEffect(() => {
@@ -164,13 +201,44 @@ export function GameProvider({ children }: { children: ReactNode }) {
           setCurrentSong(data.song);
           setRoundResult(undefined);
           setPhase("playing");
+          setRoundNumber((n) => n + 1);
           break;
 
-        case "ROUND_RESULT":
+        case "ROUND_RESULT": {
           stop();
           setRoundResult({ song: data.song, results: data.results });
           setPhase("round_result");
+
+          // Track lives and round history
+          const myResult = (data.results as PlayerResult[]).find(
+            (r) => r.name === playerName,
+          );
+          if (myResult) {
+            const outcome: RoundOutcome = myResult.correct
+              ? "correct"
+              : "wrong";
+            setRoundHistory((h) => [...h, outcome]);
+            if (!myResult.correct) {
+              setLives((l) => {
+                const newLives = l - 1;
+                if (newLives <= 0) {
+                  // Will be dead — trigger game over on next render cycle
+                  setTimeout(() => {
+                    stop();
+                    setGameOver({
+                      winner: undefined,
+                      players: data.players || [],
+                      reason: "lives",
+                    });
+                    setPhase("game_over");
+                  }, 3000); // Show the round result briefly first
+                }
+                return newLives;
+              });
+            }
+          }
           break;
+        }
 
         case "MATCH_FINISHED":
           stop();
@@ -178,6 +246,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
           setGameOver({
             winner: data.winner,
             players: data.players || [],
+            reason: "finished",
           });
           setPhase("game_over");
           break;
@@ -190,7 +259,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
           break;
       }
     };
-  }, [socket, play, stop]);
+  }, [socket, play, stop, playerName]);
 
   return (
     <GameContext.Provider
@@ -201,6 +270,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         joinGame,
         playAgain,
         updatePlayer,
+        onTimeout,
         phase,
         currentSong,
         correctAnswers,
@@ -211,6 +281,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
         setPlayerName,
         playerAvatar,
         setPlayerAvatar,
+        lives,
+        roundHistory,
+        roundNumber,
       }}
     >
       {children}
