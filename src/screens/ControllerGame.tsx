@@ -20,9 +20,9 @@ export function ControllerGame() {
       <div className="Controller">
         <h2 className="Controller-title">Join Game</h2>
         <NameEntry
-          onSubmit={(name) => {
+          onSubmit={(name, avatar) => {
             audioContext.init();
-            gameContext.joinGame(gameId, false, name);
+            gameContext.joinGame(gameId, false, name, avatar);
             setJoined(true);
           }}
         />

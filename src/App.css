@@ -157,11 +157,18 @@ span {
 
 /* --- Name Entry --- */
 
+.NameEntry-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  margin: var(--space-md) 0;
+}
+
 .NameEntry {
   display: flex;
   gap: 10px;
   align-items: center;
-  margin: var(--space-lg) 0;
 }
 
 .NameEntry-input {
@@ -263,6 +270,14 @@ span {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   animation: slideUp 0.3s ease both;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.PlayerList-avatar {
+  font-size: 22px;
+  line-height: 1;
 }
 
 /* --- Score Bar --- */

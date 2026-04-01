@@ -10,6 +10,7 @@ export interface Song {
 export interface Player {
   id: string;
   name: string;
+  avatar?: string;
   correctAnswers: Song[];
   guest?: boolean;
 }
@@ -17,6 +18,7 @@ export interface Player {
 export interface PlayerSummary {
   id: string;
   name: string;
+  avatar?: string;
   score: number;
   guest?: boolean;
 }
@@ -53,7 +55,13 @@ export type ServerEvent =
 
 // Client → Server commands
 export type ClientCommand =
-  | { command: "JOIN"; gameId: string; name?: string }
+  | { command: "JOIN"; gameId: string; name?: string; avatar?: string }
   | { command: "JOIN_GUEST"; gameId: string; name?: string }
   | { command: "REQUEST_START"; gameId: string }
-  | { command: "LOCK_ANSWER"; gameId: string; answer: number };
+  | { command: "LOCK_ANSWER"; gameId: string; answer: number }
+  | {
+      command: "UPDATE_PLAYER";
+      gameId: string;
+      name?: string;
+      avatar?: string;
+    };

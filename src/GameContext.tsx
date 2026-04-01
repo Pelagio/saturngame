@@ -33,8 +33,9 @@ interface GameContextState {
   lockAnswer: (gameId: string, answer: number) => void;
   newGame: () => Promise<string>;
   startGame: (gameId?: string) => void;
-  joinGame: (gameId: string, guest?: boolean, name?: string) => void;
+  joinGame: (gameId: string, guest?: boolean, name?: string, avatar?: string) => void;
   playAgain: () => void;
+  updatePlayer: (gameId: string, name?: string, avatar?: string) => void;
   // State
   phase: GamePhase;
   currentSong?: Song;
@@ -44,6 +45,8 @@ interface GameContextState {
   gameOver?: GameOverData;
   playerName: string;
   setPlayerName: (name: string) => void;
+  playerAvatar: string;
+  setPlayerAvatar: (avatar: string) => void;
 }
 
 const GameContext = createContext<GameContextState>({
@@ -52,10 +55,13 @@ const GameContext = createContext<GameContextState>({
   startGame: () => {},
   joinGame: () => {},
   playAgain: () => {},
+  updatePlayer: () => {},
   phase: "idle",
   players: [],
   playerName: "",
   setPlayerName: () => {},
+  playerAvatar: "",
+  setPlayerAvatar: () => {},
 });
 
 export function GameProvider({ children }: { children: ReactNode }) {
@@ -71,10 +77,18 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [playerName, setPlayerNameState] = useState(
     () => localStorage.getItem("saturn_player_name") || "",
   );
+  const [playerAvatar, setPlayerAvatarState] = useState(
+    () => localStorage.getItem("saturn_player_avatar") || "",
+  );
 
   const setPlayerName = useCallback((name: string) => {
     setPlayerNameState(name);
     localStorage.setItem("saturn_player_name", name);
+  }, []);
+
+  const setPlayerAvatar = useCallback((avatar: string) => {
+    setPlayerAvatarState(avatar);
+    localStorage.setItem("saturn_player_avatar", avatar);
   }, []);
 
   const lockAnswer = useCallback(
@@ -98,10 +112,19 @@ export function GameProvider({ children }: { children: ReactNode }) {
   );
 
   const joinGame = useCallback(
-    (gameId: string, guest?: boolean, name?: string) => {
+    (gameId: string, guest?: boolean, name?: string, avatar?: string) => {
       const command = guest ? "JOIN_GUEST" : "JOIN";
-      socket?.send(JSON.stringify({ command, gameId, name }));
+      socket?.send(JSON.stringify({ command, gameId, name, avatar }));
       setPhase("lobby");
+    },
+    [socket],
+  );
+
+  const updatePlayer = useCallback(
+    (gameId: string, name?: string, avatar?: string) => {
+      socket?.send(
+        JSON.stringify({ command: "UPDATE_PLAYER", gameId, name, avatar }),
+      );
     },
     [socket],
   );
@@ -126,12 +149,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Update player list from any event that includes it
       if (data.players && Array.isArray(data.players)) {
         setPlayers(data.players);
       }
 
-      // Update own correct answers
       if (data.player?.correctAnswers) {
         setCorrectAnswers(data.player.correctAnswers);
       }
@@ -163,7 +184,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
         case "PLAYER_JOINED":
         case "PLAYER_LEFT":
-          // players already updated above
           break;
 
         default:
@@ -180,6 +200,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         startGame,
         joinGame,
         playAgain,
+        updatePlayer,
         phase,
         currentSong,
         correctAnswers,
@@ -188,6 +209,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
         gameOver,
         playerName,
         setPlayerName,
+        playerAvatar,
+        setPlayerAvatar,
       }}
     >
       {children}

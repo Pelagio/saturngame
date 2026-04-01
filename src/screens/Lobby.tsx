@@ -29,6 +29,7 @@ export function Lobby({ gameId }: { gameId: string }) {
           <ul className="PlayerList">
             {activePlayers.map((p) => (
               <li key={p.id} className="PlayerList-item">
+                {p.avatar && <span className="PlayerList-avatar">{p.avatar}</span>}
                 {p.name}
               </li>
             ))}

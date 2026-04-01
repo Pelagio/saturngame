@@ -35,7 +35,7 @@ export function Game() {
     ) {
       hasAutoJoined.current = true;
       audioContext.init();
-      gameContext.joinGame(gameId, false, gameContext.playerName);
+      gameContext.joinGame(gameId, false, gameContext.playerName, gameContext.playerAvatar);
       setJoined(true);
     }
   }, [socketStatus, gameId, gameContext, audioContext]);
@@ -58,9 +58,9 @@ export function Game() {
       <div className="Game" style={{ justifyContent: "center" }}>
         <h2>Join Game</h2>
         <NameEntry
-          onSubmit={(name) => {
+          onSubmit={(name, avatar) => {
             audioContext.init();
-            gameContext.joinGame(gameId, false, name);
+            gameContext.joinGame(gameId, false, name, avatar);
             setJoined(true);
           }}
         />
