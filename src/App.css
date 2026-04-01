@@ -53,13 +53,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 12px 0 4px;
-  gap: 4px;
-}
-
-.App-logo {
-  width: 44px;
-  height: 44px;
+  padding: 8px 0 2px;
 }
 
 h1 {
@@ -155,14 +149,51 @@ span {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-lg);
-  padding: var(--space-xl) var(--space-md);
+  gap: var(--space-md);
+  padding: var(--space-lg) var(--space-md);
+  overflow-y: auto;
+  max-height: calc(100vh - 60px);
+}
+
+.Home-logo {
+  width: 56px;
+  height: 56px;
 }
 
 .Home-subtitle {
   color: var(--color-text-muted);
   font-size: var(--text-lg);
   margin: 0;
+}
+
+.Home-link {
+  background: none;
+  border: none;
+  color: var(--color-accent-bright, #a855f7);
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-ui);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  padding: 4px 8px;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  transition: text-decoration-color 0.15s ease;
+}
+
+.Home-link:hover {
+  text-decoration-color: var(--color-accent-bright, #a855f7);
+}
+
+.Home-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.Home-footer-dot {
+  color: var(--color-text-dim);
+  font-size: var(--text-sm);
 }
 
 .Home-tabs {

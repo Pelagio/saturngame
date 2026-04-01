@@ -19,7 +19,6 @@ function App() {
           <GameProvider>
             {!isTvRoute && (
               <header className="App-header">
-                <img src="/favicon.svg" alt="Saturn" className="App-logo" />
                 <h1>SATURN</h1>
               </header>
             )}

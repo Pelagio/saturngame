@@ -39,14 +39,13 @@ export function Home() {
 
   const startParty = async () => {
     const gameId = await newGame();
-    // Open TV display in new tab, navigate to lobby
     window.open(`${window.location.origin}/tv/${gameId}`, "_blank");
     navigate(`/game/${gameId}`);
   };
 
   return (
     <div className="Home">
-      <p className="Home-subtitle">The music timeline game</p>
+      <img src="/favicon.svg" alt="Saturn" className="Home-logo" />
 
       {/* Tab switcher */}
       <div className="Home-tabs">
@@ -82,10 +81,10 @@ export function Home() {
           </button>
 
           <button
-            className="btn btn-secondary"
+            className="Home-link"
             onClick={() => setShowModes(!showModes)}
           >
-            {showModes ? "Hide Modes" : "Game Modes"}
+            {showModes ? "Hide modes" : "Game modes"}
           </button>
 
           {showModes && (
@@ -119,20 +118,6 @@ export function Home() {
               </button>
             </div>
           )}
-
-          <button
-            className="btn btn-secondary"
-            onClick={() => setShowLeaderboard(!showLeaderboard)}
-          >
-            {showLeaderboard ? "Hide Leaderboard" : "Leaderboard"}
-          </button>
-
-          {showLeaderboard && (
-            <Leaderboard
-              date={new Date().toISOString().slice(0, 10)}
-              playerName={playerName}
-            />
-          )}
         </div>
       )}
 
@@ -154,11 +139,8 @@ export function Home() {
 
           <div className="Home-divider">or</div>
 
-          <button
-            className="btn btn-secondary"
-            onClick={() => setShowJoin(!showJoin)}
-          >
-            {showJoin ? "Cancel" : "Join a Game"}
+          <button className="Home-link" onClick={() => setShowJoin(!showJoin)}>
+            {showJoin ? "Cancel" : "Join a game"}
           </button>
 
           {showJoin && (
@@ -168,7 +150,6 @@ export function Home() {
                 e.preventDefault();
                 const code = joinCode.trim();
                 if (code) {
-                  // Support full URL or just the game ID
                   const gameId = code.includes("/game/")
                     ? code.split("/game/")[1]?.split("?")[0]
                     : code;
@@ -194,9 +175,26 @@ export function Home() {
         </div>
       )}
 
-      <button className="btn btn-secondary" onClick={() => setShowHowTo(true)}>
-        How to Play
-      </button>
+      {/* Footer links */}
+      <div className="Home-footer">
+        <button
+          className="Home-link"
+          onClick={() => setShowLeaderboard(!showLeaderboard)}
+        >
+          {showLeaderboard ? "Hide leaderboard" : "Leaderboard"}
+        </button>
+        <span className="Home-footer-dot">&middot;</span>
+        <button className="Home-link" onClick={() => setShowHowTo(true)}>
+          How to play
+        </button>
+      </div>
+
+      {showLeaderboard && (
+        <Leaderboard
+          date={new Date().toISOString().slice(0, 10)}
+          playerName={playerName}
+        />
+      )}
 
       {showHowTo && <HowToPlay onClose={() => setShowHowTo(false)} />}
     </div>
