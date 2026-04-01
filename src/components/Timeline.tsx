@@ -93,46 +93,125 @@ function DesktopTimeline() {
   );
 }
 
+// --- Mobile: tap-to-select timeline ---
+
+function MobileSegment({
+  index,
+  label,
+  selected,
+  locked,
+  onSelect,
+}: {
+  index: number;
+  label: string;
+  selected: boolean;
+  locked: boolean;
+  onSelect: (index: number) => void;
+}) {
+  return (
+    <button
+      className={`MobileSegment ${selected ? "selected" : ""} ${locked ? "locked" : ""}`}
+      onClick={() => onSelect(index)}
+      aria-label={`Place here: ${label}`}
+      aria-pressed={selected}
+    >
+      <span className="MobileSegment-label">{label}</span>
+      {selected && !locked && (
+        <span className="MobileSegment-hint">Tap LOCK to confirm</span>
+      )}
+      {locked && <span className="MobileSegment-locked">LOCKED</span>}
+    </button>
+  );
+}
+
+function MobileYearPin({ year }: { year: number }) {
+  return (
+    <div className="MobileYearPin">
+      <div className="MobileYearPin-dot" />
+      <span className="MobileYearPin-year">{year}</span>
+      <div className="MobileYearPin-line" />
+    </div>
+  );
+}
+
 function MobileTimeline() {
   const { gameId } = useParams();
-  const timelineRef = useRef<HTMLDivElement | null>(null);
   const {
     lockAnswer,
     correctAnswers: years = [],
     currentSong,
   } = useGameContext();
+  const [selected, setSelected] = useState<number | null>(null);
+  const [locked, setLocked] = useState(false);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setSelected(null);
+    setLocked(false);
+  }, [currentSong]);
 
   if (!currentSong) return null;
 
+  const handleSelect = (index: number) => {
+    if (locked) return;
+    setSelected(index);
+  };
+
+  const handleLock = () => {
+    if (selected === null || locked) return;
+    setLocked(true);
+    lockAnswer(gameId || "", selected);
+  };
+
+  // Build the list: segment, year, segment, year, ..., segment
+  const items: React.ReactNode[] = [];
+
+  // First segment: "Before [first year]"
+  const firstYear = years[0]?.year;
+  items.push(
+    <MobileSegment
+      key="seg-0"
+      index={0}
+      label={firstYear ? `Before ${firstYear}` : "Before"}
+      selected={selected === 0}
+      locked={locked && selected === 0}
+      onSelect={handleSelect}
+    />,
+  );
+
+  years.forEach((song, i) => {
+    items.push(<MobileYearPin key={`pin-${song.song_id}`} year={song.year} />);
+
+    const nextYear = years[i + 1]?.year;
+    const segLabel = nextYear
+      ? `${song.year} — ${nextYear}`
+      : `After ${song.year}`;
+
+    items.push(
+      <MobileSegment
+        key={`seg-${i + 1}`}
+        index={i + 1}
+        label={segLabel}
+        selected={selected === i + 1}
+        locked={locked && selected === i + 1}
+        onSelect={handleSelect}
+      />,
+    );
+  });
+
   return (
-    <div className="Timeline" role="group" aria-label="Song timeline">
-      <div className="Timeline-Cursor">
-        <h2>AFTER:</h2>
-        <div className="Timeline-Cursor-line" />
-        <h2>BEFORE:</h2>
+    <div className="MobileTimeline" role="group" aria-label="Song timeline">
+      <div className="MobileTimeline-list" ref={listRef}>
+        {items}
       </div>
       <button
-        className="Timeline-LockButton"
+        className={`MobileTimeline-lock ${selected !== null && !locked ? "ready" : ""}`}
+        onClick={handleLock}
+        disabled={selected === null || locked}
         aria-label="Lock answer"
-        onClick={() => {
-          const scrollTop = timelineRef.current?.scrollTop ?? 0;
-          lockAnswer(gameId || "", Math.round(scrollTop / 62));
-        }}
       >
-        LOCK
+        {locked ? "LOCKED" : "LOCK"}
       </button>
-      <div className="Timeline-List" ref={timelineRef}>
-        <div className="Timeline-List-Spacer" />
-        <div className="Timeline-List-Spacer" />
-        {[...years].map((y) => (
-          <React.Fragment key={y.song_id}>
-            <SongPin song={y} />
-          </React.Fragment>
-        ))}
-        <div className="Timeline-List-Spacer" />
-        <div className="Timeline-List-Spacer" />
-        <div className="Timeline-List-Spacer" />
-      </div>
     </div>
   );
 }
