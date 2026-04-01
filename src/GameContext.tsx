@@ -9,7 +9,7 @@ import {
 import { useAudioContext } from "./AudioContext";
 import { SimpleApi } from "./utils/simple-api/simple-api";
 import { useSocket } from "./utils/ws/ws";
-import { Song, PlayerSummary, PlayerResult } from "./types/game";
+import { Song, PlayerSummary, PlayerResult, MatchFilter } from "./types/game";
 
 export type GamePhase =
   | "idle"
@@ -36,7 +36,7 @@ const MAX_LIVES = 3;
 interface GameContextState {
   // Actions
   lockAnswer: (gameId: string, answer: number) => void;
-  newGame: () => Promise<string>;
+  newGame: (opts?: { filter?: MatchFilter; daily?: boolean }) => Promise<string>;
   startGame: (gameId?: string) => void;
   joinGame: (
     gameId: string,
@@ -122,11 +122,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
     [socket],
   );
 
-  const newGame = useCallback(async () => {
-    const api = new SimpleApi();
-    const { data = { gameId: "single" } } = await api.newGame();
-    return data.gameId;
-  }, []);
+  const newGame = useCallback(
+    async (opts?: { filter?: MatchFilter; daily?: boolean }) => {
+      const api = new SimpleApi();
+      const { data = { gameId: "single" } } = await api.newGame(opts);
+      return data.gameId;
+    },
+    [],
+  );
 
   const startGame = useCallback(
     (gameId?: string) => {

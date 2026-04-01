@@ -27,10 +27,21 @@ export function RoundResult() {
             <span className="RoundResult-icon" aria-hidden="true">
               {r.correct ? "\u2713" : "\u2717"}
             </span>
-            <span>
-              {r.name} {r.correct ? "(correct)" : "(wrong)"}
+            <span className="RoundResult-name">
+              {r.avatar && <span>{r.avatar} </span>}
+              {r.name}
             </span>
-            <span className="RoundResult-score">{r.score}</span>
+            {r.correct && r.pointsEarned > 0 && (
+              <span className="RoundResult-points">
+                +{r.pointsEarned}
+                {r.streakMultiplier > 1 && (
+                  <span className="RoundResult-streak">
+                    x{r.streakMultiplier}
+                  </span>
+                )}
+              </span>
+            )}
+            <span className="RoundResult-score">{r.points || r.score}</span>
           </div>
         ))}
       </div>

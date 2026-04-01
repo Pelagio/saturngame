@@ -155,6 +155,68 @@ span {
   margin: 0;
 }
 
+.Home-daily {
+  background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 50%, #f59e0b 100%);
+  color: var(--color-bg-deep, #07070f);
+  box-shadow: 0 4px 15px rgba(251, 191, 36, 0.4);
+}
+
+.Home-daily:hover {
+  box-shadow: 0 6px 25px rgba(251, 191, 36, 0.6);
+}
+
+.Home-daily:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.Home-modes {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-surface-border);
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 360px;
+  animation: fadeIn 0.2s ease;
+}
+
+.Home-decades {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+
+.Home-decade-btn {
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-display);
+  font-size: var(--text-sm);
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-surface-border);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.Home-decade-btn:hover {
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+}
+
+.Home-decade-btn.selected {
+  background: rgba(124, 58, 237, 0.2);
+  border-color: var(--color-accent-bright, #a855f7);
+  color: var(--color-text);
+  box-shadow: 0 0 8px rgba(124, 58, 237, 0.2);
+}
+
 /* --- Name Entry --- */
 
 .NameEntry-form {
@@ -381,6 +443,23 @@ span {
 
 .RoundResult-player.wrong .RoundResult-icon {
   color: var(--color-wrong);
+}
+
+.RoundResult-name {
+  flex: 1;
+}
+
+.RoundResult-points {
+  color: var(--color-correct);
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-display);
+  font-size: var(--text-base);
+}
+
+.RoundResult-streak {
+  color: var(--color-gold);
+  margin-left: 4px;
+  font-size: var(--text-sm);
 }
 
 .RoundResult-score {

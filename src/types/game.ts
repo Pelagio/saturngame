@@ -20,42 +20,37 @@ export interface PlayerSummary {
   name: string;
   avatar?: string;
   score: number;
+  points: number;
+  streak: number;
   guest?: boolean;
 }
 
 export interface PlayerResult {
   playerId: string;
   name: string;
+  avatar?: string;
   correct: boolean;
   score: number;
+  points: number;
+  pointsEarned: number;
+  streak: number;
+  speedBonus: number;
+  streakMultiplier: number;
 }
 
-// Server → Client events
-export type ServerEvent =
-  | { command: "START"; song: Song; player: Player; players?: PlayerSummary[] }
-  | {
-      command: "NEW_SONG";
-      song: Song;
-      player: Player;
-      players?: PlayerSummary[];
-    }
-  | {
-      command: "MATCH_FINISHED";
-      winner?: Player;
-      player: Player;
-      players?: PlayerSummary[];
-    }
-  | {
-      command: "PLAYER_JOINED";
-      player: PlayerSummary;
-      players: PlayerSummary[];
-    }
-  | { command: "PLAYER_LEFT"; playerId: string; players: PlayerSummary[] }
-  | { command: "ROUND_RESULT"; song: Song; results: PlayerResult[] };
+export interface MatchFilter {
+  decade?: number;
+  hardMode?: boolean;
+}
 
 // Client → Server commands
 export type ClientCommand =
-  | { command: "JOIN"; gameId: string; name?: string; avatar?: string }
+  | {
+      command: "JOIN";
+      gameId: string;
+      name?: string;
+      avatar?: string;
+    }
   | { command: "JOIN_GUEST"; gameId: string; name?: string }
   | { command: "REQUEST_START"; gameId: string }
   | { command: "LOCK_ANSWER"; gameId: string; answer: number }
