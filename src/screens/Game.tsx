@@ -10,6 +10,7 @@ import { Timeline } from "../components/Timeline";
 import { RoundTimer } from "../components/RoundTimer";
 import { Lives } from "../components/Lives";
 import { NameEntry } from "./NameEntry";
+import { EditProfile } from "./EditProfile";
 import { Lobby } from "./Lobby";
 import { RoundResult } from "./RoundResult";
 import { GameOver } from "./GameOver";
@@ -66,6 +67,7 @@ export function Game() {
   const audioContext = useAudioContext();
   const socketStatus = useSocketStatus();
   const [joined, setJoined] = useState(false);
+  const [editing, setEditing] = useState(false);
   const hasAutoJoined = useRef(false);
 
   // Auto-rejoin on page reload — only for full game mode, not controller
@@ -127,11 +129,25 @@ export function Game() {
     );
   }
 
+  // Edit profile
+  if (editing && gameId) {
+    return (
+      <div className="Game" style={{ justifyContent: "center" }}>
+        <EditProfile gameId={gameId} onClose={() => setEditing(false)} />
+      </div>
+    );
+  }
+
   // Lobby
   if (gameContext.phase === "lobby") {
     return (
       <div className="Game">
         <LeaveButton />
+        <button className="ProfileButton" onClick={() => setEditing(true)}>
+          {gameContext.playerAvatar && <span>{gameContext.playerAvatar}</span>}
+          <span>{gameContext.playerName}</span>
+          <span className="ProfileButton-hint">edit</span>
+        </button>
         <Lobby gameId={gameId} />
       </div>
     );

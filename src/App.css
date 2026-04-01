@@ -812,6 +812,37 @@ span {
   align-items: center;
 }
 
+/* --- Profile Button (full game mode) --- */
+
+.ProfileButton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  background: var(--color-surface);
+  border: 1px solid var(--color-surface-border);
+  border-radius: var(--radius-pill);
+  padding: 6px 16px;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-display);
+  font-size: var(--text-base);
+  color: var(--color-text);
+  transition: background 0.15s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.ProfileButton:hover {
+  background: var(--color-surface-raised);
+}
+
+.ProfileButton-hint {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--color-text-dim);
+  font-weight: 500;
+}
+
 /* --- Album Cover --- */
 
 .Cover {
