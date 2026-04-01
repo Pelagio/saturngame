@@ -653,23 +653,24 @@ span {
 
 @media only screen and (max-width: 428px) {
   .Cover {
-    width: calc(100vw - 24px);
-    padding-top: calc(100vw - 24px);
-    background-repeat: no-repeat;
-    background-position: center;
+    width: 140px;
+    height: 140px;
     background-size: cover;
-    height: unset;
     border-radius: var(--radius-lg);
+    flex-shrink: 0;
   }
 
   .App {
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: 60px 1fr;
+    grid-template-rows: 50px 1fr;
+    overflow-y: auto;
   }
 
   .Game {
-    justify-content: space-between;
+    justify-content: flex-start;
+    overflow-y: auto;
+    padding-bottom: 20px;
   }
 }
 
@@ -811,12 +812,24 @@ span {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  max-height: 50vh;
+  max-height: 40vh;
   scrollbar-width: none;
   -ms-overflow-style: none;
   padding: var(--space-sm) var(--space-md);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 6%, black 94%, transparent 100%);
-  mask-image: linear-gradient(to bottom, transparent 0%, black 6%, black 94%, transparent 100%);
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 6%,
+    black 94%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 6%,
+    black 94%,
+    transparent 100%
+  );
 }
 
 .MobileTimeline-list::-webkit-scrollbar {
@@ -846,7 +859,9 @@ span {
 .MobileSegment.selected {
   background: rgba(124, 58, 237, 0.2);
   border-color: var(--color-accent-bright, #a855f7);
-  box-shadow: 0 0 16px rgba(124, 58, 237, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 0 16px rgba(124, 58, 237, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .MobileSegment.locked {
@@ -934,7 +949,9 @@ span {
   border-color: transparent;
   color: white;
   cursor: pointer;
-  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  box-shadow:
+    0 4px 20px rgba(124, 58, 237, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .MobileTimeline-lock.ready:active {
