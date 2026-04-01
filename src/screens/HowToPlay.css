@@ -1,0 +1,101 @@
+.HowToPlay-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: var(--space-md);
+  animation: fadeIn 0.3s ease;
+}
+
+.HowToPlay {
+  background: var(--color-bg-mid, #13131f);
+  border: 1px solid var(--color-surface-border);
+  border-radius: 24px;
+  padding: 36px 32px;
+  max-width: 480px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+}
+
+.HowToPlay h2 {
+  font-size: 28px;
+  margin: 0;
+  text-align: center;
+}
+
+.HowToPlay-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.HowToPlay-step {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.HowToPlay-number {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-bright, #a855f7));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 16px;
+  color: white;
+}
+
+.HowToPlay-step h3 {
+  font-size: 17px;
+  margin: 0 0 4px;
+}
+
+.HowToPlay-step p {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.HowToPlay-multiplayer {
+  background: var(--color-surface);
+  border: 1px solid var(--color-surface-border);
+  border-radius: 16px;
+  padding: 16px 20px;
+}
+
+.HowToPlay-multiplayer h3 {
+  font-size: 17px;
+  margin: 0 0 6px;
+}
+
+.HowToPlay-multiplayer p {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+@media only screen and (max-width: 500px) {
+  .HowToPlay {
+    padding: 24px 20px;
+    border-radius: 16px;
+  }
+}
