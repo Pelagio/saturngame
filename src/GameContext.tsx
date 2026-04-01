@@ -36,7 +36,10 @@ const MAX_LIVES = 3;
 interface GameContextState {
   // Actions
   lockAnswer: (gameId: string, answer: number) => void;
-  newGame: (opts?: { filter?: MatchFilter; daily?: boolean }) => Promise<string>;
+  newGame: (opts?: {
+    filter?: MatchFilter;
+    daily?: boolean;
+  }) => Promise<string>;
   startGame: (gameId?: string) => void;
   joinGame: (
     gameId: string,
@@ -62,6 +65,7 @@ interface GameContextState {
   lives: number;
   roundHistory: RoundOutcome[];
   roundNumber: number;
+  isDaily: boolean;
 }
 
 const GameContext = createContext<GameContextState>({
@@ -81,6 +85,7 @@ const GameContext = createContext<GameContextState>({
   lives: MAX_LIVES,
   roundHistory: [],
   roundNumber: 0,
+  isDaily: false,
 });
 
 export function GameProvider({ children }: { children: ReactNode }) {
@@ -104,6 +109,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [lives, setLives] = useState(MAX_LIVES);
   const [roundHistory, setRoundHistory] = useState<RoundOutcome[]>([]);
   const [roundNumber, setRoundNumber] = useState(0);
+  const [isDaily, setIsDaily] = useState(false);
 
   const setPlayerName = useCallback((name: string) => {
     setPlayerNameState(name);
@@ -126,6 +132,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     async (opts?: { filter?: MatchFilter; daily?: boolean }) => {
       const api = new SimpleApi();
       const { data = { gameId: "single" } } = await api.newGame(opts);
+      if (opts?.daily) setIsDaily(true);
       return data.gameId;
     },
     [],
@@ -176,6 +183,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setLives(MAX_LIVES);
     setRoundHistory([]);
     setRoundNumber(0);
+    setIsDaily(false);
   }, []);
 
   useEffect(() => {
@@ -287,6 +295,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         lives,
         roundHistory,
         roundNumber,
+        isDaily,
       }}
     >
       {children}

@@ -568,6 +568,14 @@ span {
   margin: 0;
 }
 
+.GameOver-points {
+  color: var(--color-gold);
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-display);
+  font-size: var(--text-2xl);
+  margin: 0;
+}
+
 .GameOver-actions {
   display: flex;
   gap: var(--space-sm);

@@ -1,14 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGameContext, RoundOutcome } from "../GameContext";
 import { Lives } from "../components/Lives";
+import { Leaderboard } from "../components/Leaderboard";
+import { SimpleApi } from "../utils/simple-api/simple-api";
 
 function buildShareText(
   roundHistory: RoundOutcome[],
   lives: number,
   correctCount: number,
   totalRounds: number,
+  points: number,
   reason?: string,
+  isDaily?: boolean,
 ): string {
   const grid = roundHistory
     .map((r) => (r === "correct" ? "\u{1F7E9}" : "\u{1F7E5}"))
@@ -18,9 +22,14 @@ function buildShareText(
     i < lives ? "\u{2B50}" : "\u{2716}\u{FE0F}",
   ).join("");
 
+  const header = isDaily
+    ? `SATURN DAILY \u2014 ${correctCount}/${totalRounds} ${livesStars}`
+    : `SATURN \u2014 ${correctCount}/${totalRounds} ${livesStars}`;
+
   const lines = [
-    `SATURN \u2014 ${correctCount}/${totalRounds} ${livesStars}`,
+    header,
     grid,
+    `${points} pts`,
     "",
     reason === "lives"
       ? "Ran out of lives! Can you do better?"
@@ -33,19 +42,70 @@ function buildShareText(
 
 export function GameOver({ gameId }: { gameId: string }) {
   const navigate = useNavigate();
-  const { gameOver, playAgain, newGame, roundHistory, lives } =
-    useGameContext();
+  const {
+    gameOver,
+    playAgain,
+    newGame,
+    roundHistory,
+    lives,
+    playerName,
+    playerAvatar,
+    isDaily,
+  } = useGameContext();
   const [copied, setCopied] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const correctCount = roundHistory.filter((r) => r === "correct").length;
+  const totalRounds = roundHistory.length;
+
+  // Find own points from the players list
+  const myPlayer = gameOver?.players.find((p) => p.name === playerName);
+  const points = myPlayer?.points ?? 0;
+  const longestStreak = 0; // TODO: track in context
+
+  // Auto-submit daily score
+  useEffect(() => {
+    if (!isDaily || submitted || !gameOver) return;
+
+    const date = new Date().toISOString().slice(0, 10);
+    const alreadySubmitted = localStorage.getItem(`saturn_daily_${date}`);
+    if (alreadySubmitted) return;
+
+    const api = new SimpleApi();
+    api
+      .submitDailyScore({
+        date,
+        playerName,
+        avatar: playerAvatar,
+        score: correctCount,
+        points,
+        correctCount,
+        totalRounds,
+        longestStreak,
+      })
+      .then(() => {
+        localStorage.setItem(`saturn_daily_${date}`, "true");
+        setSubmitted(true);
+      })
+      .catch(() => {});
+  }, [
+    isDaily,
+    submitted,
+    gameOver,
+    playerName,
+    playerAvatar,
+    correctCount,
+    totalRounds,
+    points,
+    longestStreak,
+  ]);
 
   if (!gameOver) return null;
 
   const { winner, players, reason } = gameOver;
   const sorted = [...players]
     .filter((p) => !p.guest)
-    .sort((a, b) => b.score - a.score);
-
-  const correctCount = roundHistory.filter((r) => r === "correct").length;
-  const totalRounds = roundHistory.length;
+    .sort((a, b) => (b.points ?? b.score) - (a.points ?? a.score));
 
   const handlePlayAgain = async () => {
     playAgain();
@@ -59,15 +119,15 @@ export function GameOver({ gameId }: { gameId: string }) {
       lives,
       correctCount,
       totalRounds,
+      points,
       reason,
+      isDaily,
     );
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Fallback for browsers that don't support clipboard
-    }
+    } catch {}
   };
 
   return (
@@ -88,6 +148,11 @@ export function GameOver({ gameId }: { gameId: string }) {
         <h2 className="GameOver-stats">
           {correctCount}/{totalRounds}
         </h2>
+      )}
+
+      {/* Points display */}
+      {points > 0 && (
+        <p className="GameOver-points">{points} pts</p>
       )}
 
       {/* Round history grid */}
@@ -111,7 +176,7 @@ export function GameOver({ gameId }: { gameId: string }) {
         </div>
       </div>
 
-      {/* Leaderboard (multiplayer) */}
+      {/* Multiplayer leaderboard */}
       {sorted.length > 1 && (
         <div className="GameOver-leaderboard">
           {sorted.map((p, i) => (
@@ -124,10 +189,18 @@ export function GameOver({ gameId }: { gameId: string }) {
                 {p.avatar && <span>{p.avatar} </span>}
                 {p.name}
               </span>
-              <span className="GameOver-score">{p.score}</span>
+              <span className="GameOver-score">{p.points ?? p.score}</span>
             </div>
           ))}
         </div>
+      )}
+
+      {/* Daily leaderboard */}
+      {isDaily && (
+        <Leaderboard
+          date={new Date().toISOString().slice(0, 10)}
+          playerName={playerName}
+        />
       )}
 
       <div className="GameOver-actions">
