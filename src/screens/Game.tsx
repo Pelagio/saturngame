@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useGameContext } from "../GameContext";
 import { useAudioContext } from "../AudioContext";
+import { useSocketStatus } from "../utils/ws/ws";
 import { MuteButton } from "../components/MuteButton";
 import { Cover } from "../components/Cover";
 import { ScoreBar } from "../components/ScoreBar";
@@ -20,7 +21,24 @@ export function Game() {
 
   const gameContext = useGameContext();
   const audioContext = useAudioContext();
+  const socketStatus = useSocketStatus();
   const [joined, setJoined] = useState(false);
+  const hasAutoJoined = useRef(false);
+
+  // Auto-rejoin on page reload if the player has a stored name and the socket opens
+  useEffect(() => {
+    if (
+      !hasAutoJoined.current &&
+      socketStatus === "open" &&
+      gameId &&
+      gameContext.playerName
+    ) {
+      hasAutoJoined.current = true;
+      audioContext.init();
+      gameContext.joinGame(gameId, false, gameContext.playerName);
+      setJoined(true);
+    }
+  }, [socketStatus, gameId, gameContext, audioContext]);
 
   if (!gameId) {
     navigate("/");
