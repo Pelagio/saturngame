@@ -116,6 +116,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [isDaily, setIsDaily] = useState(false);
   const [isController, setIsController] = useState(false);
   const [currentGameId, setCurrentGameId] = useState<string>();
+  const [pendingJoin, setPendingJoin] = useState<{
+    command: string;
+    gameId: string;
+    name?: string;
+    avatar?: string;
+  } | null>(null);
 
   const setPlayerName = useCallback((name: string) => {
     setPlayerNameState(name);
@@ -154,15 +160,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const joinGame = useCallback(
     (gameId: string, guest?: boolean, name?: string, avatar?: string) => {
       const command = guest ? "JOIN_GUEST" : "JOIN";
+      const payload = { command, gameId, name, avatar };
       if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({ command, gameId, name, avatar }));
+        socket.send(JSON.stringify(payload));
       } else {
-        // Queue the join for when socket opens
-        const handler = () => {
-          socket?.send(JSON.stringify({ command, gameId, name, avatar }));
-          socket?.removeEventListener("open", handler);
-        };
-        socket?.addEventListener("open", handler);
+        // Socket not ready — store and send when it opens
+        setPendingJoin(payload);
       }
       setCurrentGameId(gameId);
       setPhase("lobby");
@@ -201,6 +204,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setRoundNumber(0);
     setIsDaily(false);
   }, []);
+
+  // Send pending join when socket connects
+  useEffect(() => {
+    if (pendingJoin && socket && socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify(pendingJoin));
+      setPendingJoin(null);
+    }
+  }, [pendingJoin, socket]);
 
   useEffect(() => {
     if (!socket) return;

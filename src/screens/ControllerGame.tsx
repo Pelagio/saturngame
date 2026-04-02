@@ -65,7 +65,8 @@ export function ControllerGame() {
   useEffect(() => {
     gameContext.setIsController(true);
     return () => gameContext.setIsController(false);
-  }, [gameContext]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Auto-rejoin on reload if player has a stored name
   useEffect(() => {
