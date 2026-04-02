@@ -233,16 +233,26 @@ export function GameProvider({ children }: { children: ReactNode }) {
               setLives((l) => {
                 const newLives = l - 1;
                 if (newLives <= 0) {
-                  // Will be dead — trigger game over on next render cycle
+                  // Build players from round results (has latest points)
+                  const resultsAsPlayers: PlayerSummary[] = (
+                    data.results as PlayerResult[]
+                  ).map((r) => ({
+                    id: r.playerId,
+                    name: r.name,
+                    avatar: r.avatar,
+                    score: r.score,
+                    points: r.points,
+                    streak: r.streak,
+                  }));
                   setTimeout(() => {
                     stop();
                     setGameOver({
                       winner: undefined,
-                      players: data.players || [],
+                      players: resultsAsPlayers,
                       reason: "lives",
                     });
                     setPhase("game_over");
-                  }, 3000); // Show the round result briefly first
+                  }, 3000);
                 }
                 return newLives;
               });
