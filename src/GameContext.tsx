@@ -154,7 +154,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const joinGame = useCallback(
     (gameId: string, guest?: boolean, name?: string, avatar?: string) => {
       const command = guest ? "JOIN_GUEST" : "JOIN";
-      socket?.send(JSON.stringify({ command, gameId, name, avatar }));
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({ command, gameId, name, avatar }));
+      } else {
+        // Queue the join for when socket opens
+        const handler = () => {
+          socket?.send(JSON.stringify({ command, gameId, name, avatar }));
+          socket?.removeEventListener("open", handler);
+        };
+        socket?.addEventListener("open", handler);
+      }
       setCurrentGameId(gameId);
       setPhase("lobby");
     },
