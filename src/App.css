@@ -1276,13 +1276,16 @@ span {
   align-self: stretch;
   gap: 0;
   position: relative;
+  flex: 1;
+  min-height: 0;
 }
 
 .MobileTimeline-list {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  max-height: 40vh;
+  flex: 1;
+  min-height: 0;
   scrollbar-width: none;
   -ms-overflow-style: none;
   padding: var(--space-sm) var(--space-md);
