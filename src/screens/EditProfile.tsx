@@ -9,8 +9,13 @@ export function EditProfile({
   gameId: string;
   onClose: () => void;
 }) {
-  const { playerName, setPlayerName, playerAvatar, setPlayerAvatar, updatePlayer } =
-    useGameContext();
+  const {
+    playerName,
+    setPlayerName,
+    playerAvatar,
+    setPlayerAvatar,
+    updatePlayer,
+  } = useGameContext();
   const [name, setName] = useState(playerName);
   const [avatar, setAvatar] = useState(playerAvatar);
 

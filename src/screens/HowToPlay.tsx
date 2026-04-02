@@ -55,8 +55,8 @@ export function HowToPlay({ onClose }: { onClose: () => void }) {
         <div className="HowToPlay-section">
           <h3>Lives</h3>
           <p>
-            You start with 3 lives. Wrong answers and timeouts cost a life.
-            Lose all 3 and the game is over. First to 10 correct wins.
+            You start with 3 lives. Wrong answers and timeouts cost a life. Lose
+            all 3 and the game is over. First to 10 correct wins.
           </p>
         </div>
 

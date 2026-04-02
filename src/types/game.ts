@@ -59,4 +59,5 @@ export type ClientCommand =
       gameId: string;
       name?: string;
       avatar?: string;
-    };
+    }
+  | { command: "FORFEIT"; gameId: string };

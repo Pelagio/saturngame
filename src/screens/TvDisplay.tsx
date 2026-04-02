@@ -33,7 +33,12 @@ export function TvDisplay() {
       <div className="Tv">
         <div className="Tv-lobby">
           <div className="Tv-qr-section">
-            <QRCode value={joinURL} size={300} bgColor="transparent" fgColor="white" />
+            <QRCode
+              value={joinURL}
+              size={300}
+              bgColor="transparent"
+              fgColor="white"
+            />
             <p className="Tv-join-label">Scan to join</p>
             <p className="Tv-join-url">{joinURL}</p>
           </div>
@@ -65,7 +70,11 @@ export function TvDisplay() {
     return (
       <div className="Tv">
         <div className="Tv-round-result">
-          <img className="Tv-result-cover" src={song.image_url} alt={song.name} />
+          <img
+            className="Tv-result-cover"
+            src={song.image_url}
+            alt={song.name}
+          />
           <div className="Tv-result-info">
             <h2 className="Tv-result-title">{song.name}</h2>
             <p className="Tv-result-artist">{song.artist_name}</p>
@@ -73,8 +82,13 @@ export function TvDisplay() {
           </div>
           <div className="Tv-result-players">
             {results.map((r) => (
-              <div key={r.playerId} className={`Tv-result-row ${r.correct ? "correct" : "wrong"}`}>
-                <span className="Tv-result-icon">{r.correct ? "\u2713" : "\u2717"}</span>
+              <div
+                key={r.playerId}
+                className={`Tv-result-row ${r.correct ? "correct" : "wrong"}`}
+              >
+                <span className="Tv-result-icon">
+                  {r.correct ? "\u2713" : "\u2717"}
+                </span>
                 <span className="Tv-result-name">{r.name}</span>
                 <span className="Tv-result-score">{r.score}</span>
               </div>
@@ -105,7 +119,10 @@ export function TvDisplay() {
           )}
           <div className="Tv-leaderboard">
             {sorted.map((p, i) => (
-              <div key={p.id} className={`Tv-leaderboard-row ${p.id === winner?.id ? "winner" : ""}`}>
+              <div
+                key={p.id}
+                className={`Tv-leaderboard-row ${p.id === winner?.id ? "winner" : ""}`}
+              >
                 <span className="Tv-leaderboard-rank">#{i + 1}</span>
                 <span className="Tv-leaderboard-name">{p.name}</span>
                 <span className="Tv-leaderboard-score">{p.score}</span>
@@ -113,7 +130,12 @@ export function TvDisplay() {
             ))}
           </div>
           <div className="Tv-qr-small">
-            <QRCode value={joinURL} size={150} bgColor="transparent" fgColor="white" />
+            <QRCode
+              value={joinURL}
+              size={150}
+              bgColor="transparent"
+              fgColor="white"
+            />
             <p className="Tv-join-label">Scan for next game</p>
           </div>
         </div>
@@ -128,7 +150,9 @@ export function TvDisplay() {
         <div
           key={gameContext.currentSong?.song_id}
           className="Tv-cover"
-          style={{ backgroundImage: `url(${gameContext.currentSong?.image_url})` }}
+          style={{
+            backgroundImage: `url(${gameContext.currentSong?.image_url})`,
+          }}
         />
         <div className="Tv-scoreboard">
           <h3 className="Tv-scoreboard-title">Scoreboard</h3>

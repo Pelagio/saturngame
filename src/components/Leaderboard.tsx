@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  SimpleApi,
-  LeaderboardEntry,
-} from "../utils/simple-api/simple-api";
+import { SimpleApi, LeaderboardEntry } from "../utils/simple-api/simple-api";
 import "./Leaderboard.css";
 
 export function Leaderboard({

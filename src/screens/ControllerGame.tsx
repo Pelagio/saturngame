@@ -154,7 +154,7 @@ export function ControllerGame() {
   // Round result
   if (gameContext.phase === "round_result" && gameContext.roundResult) {
     const { song, results } = gameContext.roundResult;
-    const myResult = results.find((r) => r.name === gameContext.playerName);
+    const myResult = results.find((r) => r.playerId === gameContext.playerId);
 
     return (
       <div className="Controller">
@@ -177,7 +177,7 @@ export function ControllerGame() {
   // Game over
   if (gameContext.phase === "game_over" && gameContext.gameOver) {
     const { winner } = gameContext.gameOver;
-    const isWinner = winner?.name === gameContext.playerName;
+    const isWinner = winner?.id === gameContext.playerId;
 
     return (
       <div className="Controller">

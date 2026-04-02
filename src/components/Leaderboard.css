@@ -35,11 +35,21 @@
   animation: slideUp 0.3s ease both;
 }
 
-.Leaderboard-row:nth-child(1) { animation-delay: 0.03s; }
-.Leaderboard-row:nth-child(2) { animation-delay: 0.06s; }
-.Leaderboard-row:nth-child(3) { animation-delay: 0.09s; }
-.Leaderboard-row:nth-child(4) { animation-delay: 0.12s; }
-.Leaderboard-row:nth-child(5) { animation-delay: 0.15s; }
+.Leaderboard-row:nth-child(1) {
+  animation-delay: 0.03s;
+}
+.Leaderboard-row:nth-child(2) {
+  animation-delay: 0.06s;
+}
+.Leaderboard-row:nth-child(3) {
+  animation-delay: 0.09s;
+}
+.Leaderboard-row:nth-child(4) {
+  animation-delay: 0.12s;
+}
+.Leaderboard-row:nth-child(5) {
+  animation-delay: 0.15s;
+}
 
 .Leaderboard-row.you {
   background: rgba(124, 58, 237, 0.15);

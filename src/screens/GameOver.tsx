@@ -50,6 +50,7 @@ export function GameOver({ gameId }: { gameId: string }) {
     lives,
     playerName,
     playerAvatar,
+    playerId,
     isDaily,
   } = useGameContext();
   const [copied, setCopied] = useState(false);
@@ -59,7 +60,7 @@ export function GameOver({ gameId }: { gameId: string }) {
   const totalRounds = roundHistory.length;
 
   // Find own points from the players list
-  const myPlayer = gameOver?.players.find((p) => p.name === playerName);
+  const myPlayer = gameOver?.players.find((p) => p.id === playerId);
   const points = myPlayer?.points ?? 0;
   const longestStreak = 0; // TODO: track in context
 
@@ -151,9 +152,7 @@ export function GameOver({ gameId }: { gameId: string }) {
       )}
 
       {/* Points display */}
-      {points > 0 && (
-        <p className="GameOver-points">{points} pts</p>
-      )}
+      {points > 0 && <p className="GameOver-points">{points} pts</p>}
 
       {/* Round history grid */}
       <div className="ShareCard">

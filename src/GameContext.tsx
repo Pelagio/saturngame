@@ -8,7 +8,7 @@ import {
 } from "react";
 import { useAudioContext } from "./AudioContext";
 import { SimpleApi } from "./utils/simple-api/simple-api";
-import { useSocket } from "./utils/ws/ws";
+import { useSocketSend, useSetOnMessage } from "./utils/ws/ws";
 import { Song, PlayerSummary, PlayerResult, MatchFilter } from "./types/game";
 
 export type GamePhase =
@@ -61,6 +61,7 @@ interface GameContextState {
   setPlayerName: (name: string) => void;
   playerAvatar: string;
   setPlayerAvatar: (avatar: string) => void;
+  playerId: string;
   // Single player
   lives: number;
   roundHistory: RoundOutcome[];
@@ -84,6 +85,7 @@ const GameContext = createContext<GameContextState>({
   setPlayerName: () => {},
   playerAvatar: "",
   setPlayerAvatar: () => {},
+  playerId: "",
   lives: MAX_LIVES,
   roundHistory: [],
   roundNumber: 0,
@@ -93,7 +95,8 @@ const GameContext = createContext<GameContextState>({
 });
 
 export function GameProvider({ children }: { children: ReactNode }) {
-  const socket = useSocket();
+  const sendWhenReady = useSocketSend();
+  const setOnMessage = useSetOnMessage();
   const { play, stop } = useAudioContext();
 
   const [phase, setPhase] = useState<GamePhase>("idle");
@@ -108,6 +111,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [playerAvatar, setPlayerAvatarState] = useState(
     () => localStorage.getItem("saturn_player_avatar") || "",
   );
+  const [playerId, setPlayerId] = useState(
+    () => sessionStorage.getItem("saturn_player_id") || "",
+  );
 
   // Single player state
   const [lives, setLives] = useState(MAX_LIVES);
@@ -116,12 +122,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [isDaily, setIsDaily] = useState(false);
   const [isController, setIsController] = useState(false);
   const [currentGameId, setCurrentGameId] = useState<string>();
-  const [pendingJoin, setPendingJoin] = useState<{
-    command: string;
-    gameId: string;
-    name?: string;
-    avatar?: string;
-  } | null>(null);
 
   const setPlayerName = useCallback((name: string) => {
     setPlayerNameState(name);
@@ -135,9 +135,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   const lockAnswer = useCallback(
     (gameId: string, answer: number) => {
-      socket?.send(JSON.stringify({ command: "LOCK_ANSWER", answer, gameId }));
+      sendWhenReady(JSON.stringify({ command: "LOCK_ANSWER", answer, gameId }));
     },
-    [socket],
+    [sendWhenReady],
   );
 
   const newGame = useCallback(
@@ -152,44 +152,41 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   const startGame = useCallback(
     (gameId?: string) => {
-      socket?.send(JSON.stringify({ command: "REQUEST_START", gameId }));
+      sendWhenReady(JSON.stringify({ command: "REQUEST_START", gameId }));
     },
-    [socket],
+    [sendWhenReady],
   );
 
   const joinGame = useCallback(
     (gameId: string, guest?: boolean, name?: string, avatar?: string) => {
       const command = guest ? "JOIN_GUEST" : "JOIN";
-      const payload = { command, gameId, name, avatar };
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify(payload));
-      } else {
-        // Socket not ready — store and send when it opens
-        setPendingJoin(payload);
-      }
+      // Read freshest playerId from sessionStorage for reconnect
+      const storedPlayerId = sessionStorage.getItem("saturn_player_id") || undefined;
+      const payload = { command, gameId, name, avatar, playerId: storedPlayerId };
+      sendWhenReady(JSON.stringify(payload));
       setCurrentGameId(gameId);
       setPhase("lobby");
     },
-    [socket],
+    [sendWhenReady],
   );
 
   const updatePlayer = useCallback(
     (gameId: string, name?: string, avatar?: string) => {
-      socket?.send(
+      sendWhenReady(
         JSON.stringify({ command: "UPDATE_PLAYER", gameId, name, avatar }),
       );
     },
-    [socket],
+    [sendWhenReady],
   );
 
   const onTimeout = useCallback(
     (gameId: string) => {
       // Timer ran out — lock a deliberately wrong answer (segment -1 doesn't exist)
-      socket?.send(
+      sendWhenReady(
         JSON.stringify({ command: "LOCK_ANSWER", answer: -1, gameId }),
       );
     },
-    [socket],
+    [sendWhenReady],
   );
 
   const playAgain = useCallback(() => {
@@ -203,20 +200,13 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setRoundHistory([]);
     setRoundNumber(0);
     setIsDaily(false);
+    setPlayerId("");
+    sessionStorage.removeItem("saturn_player_id");
   }, []);
 
-  // Send pending join when socket connects
+  // Register message handler
   useEffect(() => {
-    if (pendingJoin && socket && socket.readyState === WebSocket.OPEN) {
-      socket.send(JSON.stringify(pendingJoin));
-      setPendingJoin(null);
-    }
-  }, [pendingJoin, socket]);
-
-  useEffect(() => {
-    if (!socket) return;
-
-    socket.onmessage = (msg) => {
+    setOnMessage((msg) => {
       let data;
       try {
         data = JSON.parse(msg.data);
@@ -233,6 +223,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
       }
 
       switch (data.command) {
+        case "JOIN_ACK":
+          setPlayerId(data.playerId);
+          sessionStorage.setItem("saturn_player_id", data.playerId);
+          break;
+
         case "START":
         case "NEW_SONG":
           if (!isController) play(data.song);
@@ -247,9 +242,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
           setRoundResult({ song: data.song, results: data.results });
           setPhase("round_result");
 
-          // Track lives and round history
+          // Track lives and round history — use freshest playerId from sessionStorage
+          const currentPlayerId = sessionStorage.getItem("saturn_player_id") || "";
           const myResult = (data.results as PlayerResult[]).find(
-            (r) => r.name === playerName,
+            (r) => r.playerId === currentPlayerId,
           );
           if (myResult) {
             const outcome: RoundOutcome = myResult.correct
@@ -273,7 +269,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
                   }));
                   // Tell server this player is out
                   if (currentGameId) {
-                    socket?.send(
+                    sendWhenReady(
                       JSON.stringify({
                         command: "FORFEIT",
                         gameId: currentGameId,
@@ -315,8 +311,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
         default:
           break;
       }
-    };
-  }, [socket, play, stop, playerName, isController, currentGameId]);
+    });
+  }, [setOnMessage, play, stop, isController, currentGameId, sendWhenReady]);
 
   return (
     <GameContext.Provider
@@ -338,6 +334,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         setPlayerName,
         playerAvatar,
         setPlayerAvatar,
+        playerId,
         lives,
         roundHistory,
         roundNumber,
