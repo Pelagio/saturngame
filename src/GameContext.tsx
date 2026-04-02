@@ -161,8 +161,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
     (gameId: string, guest?: boolean, name?: string, avatar?: string) => {
       const command = guest ? "JOIN_GUEST" : "JOIN";
       // Read freshest playerId from sessionStorage for reconnect
-      const storedPlayerId = sessionStorage.getItem("saturn_player_id") || undefined;
-      const payload = { command, gameId, name, avatar, playerId: storedPlayerId };
+      const storedPlayerId =
+        sessionStorage.getItem("saturn_player_id") || undefined;
+      const payload = {
+        command,
+        gameId,
+        name,
+        avatar,
+        playerId: storedPlayerId,
+      };
       sendWhenReady(JSON.stringify(payload));
       setCurrentGameId(gameId);
       setPhase("lobby");
@@ -190,6 +197,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   );
 
   const playAgain = useCallback(() => {
+    stop();
     setPhase("idle");
     setCurrentSong(undefined);
     setCorrectAnswers([]);
@@ -202,7 +210,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setIsDaily(false);
     setPlayerId("");
     sessionStorage.removeItem("saturn_player_id");
-  }, []);
+  }, [stop]);
 
   // Register message handler
   useEffect(() => {
@@ -243,7 +251,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
           setPhase("round_result");
 
           // Track lives and round history — use freshest playerId from sessionStorage
-          const currentPlayerId = sessionStorage.getItem("saturn_player_id") || "";
+          const currentPlayerId =
+            sessionStorage.getItem("saturn_player_id") || "";
           const myResult = (data.results as PlayerResult[]).find(
             (r) => r.playerId === currentPlayerId,
           );
