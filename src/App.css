@@ -834,6 +834,16 @@ span {
   padding-top: max(12px, env(safe-area-inset-top));
 }
 
+.Controller-hud {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  width: 100%;
+  padding: 8px var(--space-md);
+  padding-top: max(8px, env(safe-area-inset-top));
+}
+
 .Controller-profile {
   display: flex;
   align-items: center;

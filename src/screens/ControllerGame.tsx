@@ -203,12 +203,10 @@ export function ControllerGame() {
   // Playing
   return (
     <div className="Controller">
-      <div className="Controller-header">
+      <div className="Controller-hud">
         <LeaveButton />
-        {profileHeader}
         <Lives />
         <RoundTimer />
-        <ScoreBar />
       </div>
       <Timeline />
     </div>
