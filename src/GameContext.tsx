@@ -66,6 +66,8 @@ interface GameContextState {
   roundHistory: RoundOutcome[];
   roundNumber: number;
   isDaily: boolean;
+  isController: boolean;
+  setIsController: (v: boolean) => void;
 }
 
 const GameContext = createContext<GameContextState>({
@@ -86,6 +88,8 @@ const GameContext = createContext<GameContextState>({
   roundHistory: [],
   roundNumber: 0,
   isDaily: false,
+  isController: false,
+  setIsController: () => {},
 });
 
 export function GameProvider({ children }: { children: ReactNode }) {
@@ -110,6 +114,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [roundHistory, setRoundHistory] = useState<RoundOutcome[]>([]);
   const [roundNumber, setRoundNumber] = useState(0);
   const [isDaily, setIsDaily] = useState(false);
+  const [isController, setIsController] = useState(false);
+  const [currentGameId, setCurrentGameId] = useState<string>();
 
   const setPlayerName = useCallback((name: string) => {
     setPlayerNameState(name);
@@ -149,6 +155,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     (gameId: string, guest?: boolean, name?: string, avatar?: string) => {
       const command = guest ? "JOIN_GUEST" : "JOIN";
       socket?.send(JSON.stringify({ command, gameId, name, avatar }));
+      setCurrentGameId(gameId);
       setPhase("lobby");
     },
     [socket],
@@ -208,7 +215,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       switch (data.command) {
         case "START":
         case "NEW_SONG":
-          play(data.song);
+          if (!isController) play(data.song);
           setCurrentSong(data.song);
           setRoundResult(undefined);
           setPhase("playing");
@@ -216,7 +223,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
           break;
 
         case "ROUND_RESULT": {
-          stop();
+          if (!isController) stop();
           setRoundResult({ song: data.song, results: data.results });
           setPhase("round_result");
 
@@ -244,8 +251,17 @@ export function GameProvider({ children }: { children: ReactNode }) {
                     points: r.points,
                     streak: r.streak,
                   }));
+                  // Tell server this player is out
+                  if (currentGameId) {
+                    socket?.send(
+                      JSON.stringify({
+                        command: "FORFEIT",
+                        gameId: currentGameId,
+                      }),
+                    );
+                  }
                   setTimeout(() => {
-                    stop();
+                    if (!isController) stop();
                     setGameOver({
                       winner: undefined,
                       players: resultsAsPlayers,
@@ -262,7 +278,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         }
 
         case "MATCH_FINISHED":
-          stop();
+          if (!isController) stop();
           setCurrentSong(undefined);
           setGameOver({
             winner: data.winner,
@@ -280,7 +296,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
           break;
       }
     };
-  }, [socket, play, stop, playerName]);
+  }, [socket, play, stop, playerName, isController, currentGameId]);
 
   return (
     <GameContext.Provider
@@ -306,6 +322,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
         roundHistory,
         roundNumber,
         isDaily,
+        isController,
+        setIsController,
       }}
     >
       {children}

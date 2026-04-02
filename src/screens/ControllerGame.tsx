@@ -61,6 +61,12 @@ export function ControllerGame() {
   const [editing, setEditing] = useState(false);
   const hasAutoJoined = useRef(false);
 
+  // Mark as controller — no audio playback
+  useEffect(() => {
+    gameContext.setIsController(true);
+    return () => gameContext.setIsController(false);
+  }, [gameContext]);
+
   // Auto-rejoin on reload if player has a stored name
   useEffect(() => {
     if (
