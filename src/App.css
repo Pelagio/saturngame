@@ -1150,6 +1150,7 @@ span {
   animation: fadeIn 0.35s ease;
   flex: 1;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 /* --- Timeline --- */

@@ -79,6 +79,14 @@ export function Game() {
       gameId &&
       gameContext.playerName
     ) {
+      // Don't rejoin a game that already finished
+      const finishedGames = JSON.parse(
+        sessionStorage.getItem("saturn_finished_games") || "[]",
+      );
+      if (finishedGames.includes(gameId)) {
+        navigate("/");
+        return;
+      }
       hasAutoJoined.current = true;
       audioContext.init();
       gameContext.joinGame(
@@ -89,7 +97,7 @@ export function Game() {
       );
       setJoined(true);
     }
-  }, [isController, socketStatus, gameId, gameContext, audioContext]);
+  }, [isController, socketStatus, gameId, gameContext, audioContext, navigate]);
 
   if (!gameId) {
     navigate("/");

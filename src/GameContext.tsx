@@ -133,6 +133,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("saturn_player_avatar", avatar);
   }, []);
 
+  const markGameFinished = useCallback((gameId: string) => {
+    const finished = JSON.parse(
+      sessionStorage.getItem("saturn_finished_games") || "[]",
+    );
+    if (!finished.includes(gameId)) {
+      finished.push(gameId);
+      sessionStorage.setItem("saturn_finished_games", JSON.stringify(finished));
+    }
+  }, []);
+
   const lockAnswer = useCallback(
     (gameId: string, answer: number) => {
       sendWhenReady(JSON.stringify({ command: "LOCK_ANSWER", answer, gameId }));
@@ -284,6 +294,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
                         gameId: currentGameId,
                       }),
                     );
+                    markGameFinished(currentGameId);
                   }
                   setTimeout(() => {
                     if (!isController) stop();
@@ -311,6 +322,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
             reason: "finished",
           });
           setPhase("game_over");
+          if (currentGameId) markGameFinished(currentGameId);
           break;
 
         case "PLAYER_JOINED":
