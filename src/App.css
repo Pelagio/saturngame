@@ -840,8 +840,9 @@ span {
   justify-content: center;
   gap: var(--space-md);
   width: 100%;
-  padding: 8px var(--space-md);
-  padding-top: max(8px, env(safe-area-inset-top));
+  padding: 12px var(--space-md) 16px;
+  padding-top: max(12px, calc(env(safe-area-inset-top) + 8px));
+  flex-shrink: 0;
 }
 
 .Controller-profile {
@@ -910,6 +911,10 @@ span {
   border-radius: 20px;
   text-align: center;
   margin: 0 var(--space-md);
+  margin-top: max(
+    var(--space-xl),
+    calc(env(safe-area-inset-top) + var(--space-lg))
+  );
 }
 
 .Controller-result.correct {
@@ -1260,7 +1265,6 @@ span {
 }
 
 .SongPin > span {
-  font-size: var(--text-sm);
   font-family: var(--font-body);
   font-weight: 700;
   z-index: 2;
@@ -1289,19 +1293,19 @@ span {
   min-height: 0;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding: var(--space-sm) var(--space-md);
+  padding: var(--space-xl) var(--space-md) var(--space-md);
   -webkit-mask-image: linear-gradient(
     to bottom,
-    transparent 0%,
-    black 6%,
-    black 94%,
+    transparent 0,
+    black 24px,
+    black calc(100% - 24px),
     transparent 100%
   );
   mask-image: linear-gradient(
     to bottom,
-    transparent 0%,
-    black 6%,
-    black 94%,
+    transparent 0,
+    black 24px,
+    black calc(100% - 24px),
     transparent 100%
   );
 }

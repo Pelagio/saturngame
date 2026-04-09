@@ -118,6 +118,7 @@ export function Game() {
         <h2>Join Game</h2>
         <NameEntry
           onSubmit={(name, avatar) => {
+            hasAutoJoined.current = true;
             audioContext.init();
             gameContext.joinGame(gameId, false, name, avatar);
             setJoined(true);
@@ -126,6 +127,7 @@ export function Game() {
         <button
           className="btn btn-secondary"
           onClick={() => {
+            hasAutoJoined.current = true;
             audioContext.init();
             gameContext.joinGame(gameId, true, "Guest");
             setJoined(true);
